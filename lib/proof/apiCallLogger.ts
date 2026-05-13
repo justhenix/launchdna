@@ -1,0 +1,102 @@
+import type { BirdeyeEndpoint } from "@/lib/birdeye/endpoints";
+import type { LaunchCase } from "@/types/launch-case";
+
+type EndpointStatus = NonNullable<LaunchCase["endpointProof"][number]["status"]>;
+
+export type EndpointCallResult = {
+  endpoint: BirdeyeEndpoint;
+  calls: number;
+  status: EndpointStatus;
+};
+
+export type BirdeyeCallLogEntry = EndpointCallResult & {
+  at: string;
+  durationMs?: number;
+  statusCode?: number;
+  tokenAddress?: string;
+  error?: string;
+};
+
+type ApiLogGlobal = typeof globalThis & {
+  __launchDnaBirdeyeCalls?: BirdeyeCallLogEntry[];
+};
+
+function getStore() {
+  const store = globalThis as ApiLogGlobal;
+  if (!store.__launchDnaBirdeyeCalls) {
+    store.__launchDnaBirdeyeCalls = [];
+  }
+
+  return store.__launchDnaBirdeyeCalls;
+}
+
+export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
+  getStore().push({
+    ...entry,
+    at: new Date().toISOString(),
+  });
+}
+
+function mergeStatus(current: EndpointStatus, next: EndpointStatus): EndpointStatus {
+  if (current === "failed" || next === "failed") {
+    return "failed";
+  }
+
+  if (current === "ok" || next === "ok") {
+    return "ok";
+  }
+
+  return "fallback";
+}
+
+export function buildEndpointProof(
+  results: EndpointCallResult[],
+  endpointOrder: readonly BirdeyeEndpoint[] = [],
+): LaunchCase["endpointProof"] {
+  const byEndpoint = new Map<BirdeyeEndpoint, EndpointCallResult>();
+
+  for (const endpoint of endpointOrder) {
+    byEndpoint.set(endpoint, {
+      endpoint,
+      calls: 0,
+      status: "fallback",
+    });
+  }
+
+  for (const result of results) {
+    const existing = byEndpoint.get(result.endpoint);
+    if (!existing) {
+      byEndpoint.set(result.endpoint, { ...result });
+      continue;
+    }
+
+    byEndpoint.set(result.endpoint, {
+      endpoint: result.endpoint,
+      calls: existing.calls + result.calls,
+      status: mergeStatus(existing.status, result.status),
+    });
+  }
+
+  return Array.from(byEndpoint.values());
+}
+
+export function fallbackEndpointProof(
+  endpointOrder: readonly BirdeyeEndpoint[],
+): LaunchCase["endpointProof"] {
+  return endpointOrder.map((endpoint) => ({
+    endpoint,
+    calls: 0,
+    status: "fallback",
+  }));
+}
+
+export function getApiCallStats() {
+  const entries = getStore();
+  const endpointProof = buildEndpointProof(entries);
+
+  return {
+    totalCalls: entries.reduce((total, entry) => total + entry.calls, 0),
+    endpointProof,
+    entries,
+  };
+}
