@@ -17,9 +17,10 @@
 @layer base {
   body {
     @apply bg-ldna-bg text-ldna-text font-sans antialiased min-h-screen selection:bg-ldna-accent selection:text-white;
-    background-image: linear-gradient(to right, var(--color-ldna-grid) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--color-ldna-grid) 1px, transparent 1px);
-    background-size: 64px 64px;
-    background-position: center top;
   }
+}
+
+.bg-dot-grid {
+  background-image: radial-gradient(var(--color-ldna-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

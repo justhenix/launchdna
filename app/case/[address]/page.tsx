@@ -5,27 +5,34 @@ import { MOCK_LAUNCH_CASE } from "@/lib/mock/launch-case";
 import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-export default function CaseFilePage({ params: _params }: { params: Promise<{ address: string }> }) {
+export default function CaseFilePage() {
   // const resolvedParams = use(params);
   const data = MOCK_LAUNCH_CASE;
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl">
+    <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
+      <div className="fixed inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay -z-10" />
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
+
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-8 border-b border-ldna-grid">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-8 border-b border-ldna-grid relative">
+        <div className="absolute top-0 right-0 w-1/3 h-px bg-gradient-to-r from-transparent via-ldna-accent/50 to-transparent" />
+        
         <div>
           <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse" />
             <span>{"// CASE FILE"}</span>
-            <span className="text-ldna-muted">{data.token.address.slice(0,8)}...</span>
+            <span className="text-ldna-muted">{data.token.address.slice(0,12)}...</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-2 flex items-center gap-4">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 flex items-center gap-4 tracking-tight">
             {data.token.name}
-            <span className="text-2xl font-mono text-ldna-muted">${data.token.symbol}</span>
+            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-2 py-1 bg-ldna-panel/50">${data.token.symbol}</span>
           </h1>
         </div>
         <div className="mt-6 md:mt-0 text-left md:text-right">
-          <div className="text-xs font-mono text-ldna-muted mb-2 uppercase">Classification Result</div>
-          <div className="inline-flex items-center gap-3 px-4 py-2 border border-ldna-accent bg-ldna-accent/10">
+          <div className="text-xs font-mono text-ldna-muted mb-2 uppercase tracking-widest">Classification Result</div>
+          <div className="inline-flex items-center gap-3 px-4 py-2 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-[100%] animate-[shimmer_2s_infinite]" />
             <ShieldAlert className="w-5 h-5 text-ldna-accent" />
             <span className="font-mono font-bold text-lg text-ldna-accent uppercase tracking-wider">{data.classification.archetype}</span>
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-3">{data.classification.confidence}% CONF</span>
@@ -40,36 +47,42 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
           
           {/* Section 01: Summary */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2">
-              01 / Launch Summary
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span>01 / Launch Summary</span>
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6">
-              <p className="text-lg leading-relaxed">{data.classification.summary}</p>
+            <div className="bg-ldna-panel/80 backdrop-blur-sm border border-ldna-grid p-6 md:p-8 relative">
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-ldna-accent" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-ldna-accent" />
+              <p className="text-lg md:text-xl leading-relaxed text-ldna-text/90 font-serif">{data.classification.summary}</p>
             </div>
           </section>
 
           {/* Section 02: Replay Chart */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay</span>
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE OHLCV</span>
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6 h-80">
+            <div className="bg-ldna-panel/60 border border-ldna-grid p-6 h-96 relative group">
+              {/* Scanline effect */}
+              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.chart}>
                   <defs>
                     <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-ldna-accent)" stopOpacity={0.3}/>
+                      <stop offset="5%" stopColor="var(--color-ldna-accent)" stopOpacity={0.4}/>
                       <stop offset="95%" stopColor="var(--color-ldna-accent)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="time" hide />
                   <YAxis hide domain={['auto', 'auto']} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--color-ldna-panel)', borderColor: 'var(--color-ldna-grid)', borderRadius: 0 }}
+                    contentStyle={{ backgroundColor: 'var(--color-ldna-panel)', borderColor: 'var(--color-ldna-grid)', borderRadius: 0, boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}
                     itemStyle={{ color: 'var(--color-ldna-text)', fontFamily: 'monospace' }}
                     labelStyle={{ color: 'var(--color-ldna-muted)', fontFamily: 'monospace' }}
+                    cursor={{ stroke: 'var(--color-ldna-accent)', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
-                  <Area type="monotone" dataKey="price" stroke="var(--color-ldna-accent)" fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} />
+                  <Area type="step" dataKey="price" stroke="var(--color-ldna-accent)" fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -77,22 +90,23 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
 
           {/* Section 03: Evidence Grid */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Crosshair className="w-4 h-4" /> 03 / Key Evidence
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span className="flex items-center gap-2"><Crosshair className="w-4 h-4" /> 03 / Key Evidence</span>
+              <span className="text-[10px] bg-ldna-grid text-ldna-muted px-1.5 py-0.5 border border-ldna-grid">HEURISTIC MATCHES</span>
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {data.evidence.map((ev, i) => (
-                <div key={i} className="bg-ldna-panel border border-ldna-grid p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="text-xs font-mono font-bold uppercase tracking-wider text-ldna-text">{ev.label}</div>
-                    {ev.severity === 'danger' && <AlertTriangle className="w-4 h-4 text-ldna-accent" />}
+                <div key={i} className="bg-ldna-panel/80 border border-ldna-grid p-6 hover:border-ldna-accent/30 transition-colors">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-xs font-mono font-bold uppercase tracking-wider text-ldna-text/80">{ev.label}</div>
+                    {ev.severity === 'danger' && <AlertTriangle className="w-4 h-4 text-ldna-accent animate-pulse" />}
                     {ev.severity === 'warning' && <AlertTriangle className="w-4 h-4 text-ldna-warning" />}
                     {ev.severity === 'good' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                   </div>
-                  <div className={`text-2xl font-mono font-bold mb-2 ${ev.severity === 'danger' ? 'text-ldna-accent' : ev.severity === 'warning' ? 'text-ldna-warning' : 'text-ldna-text'}`}>
+                  <div className={`text-3xl font-mono font-bold mb-3 ${ev.severity === 'danger' ? 'text-ldna-accent shadow-ldna-accent' : ev.severity === 'warning' ? 'text-ldna-warning' : 'text-ldna-text'}`}>
                     {ev.value}
                   </div>
-                  <p className="text-sm text-ldna-muted">{ev.explanation}</p>
+                  <p className="text-sm text-ldna-muted leading-relaxed">{ev.explanation}</p>
                 </div>
               ))}
             </div>
@@ -100,20 +114,20 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
 
           {/* Section 04: Timeline */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Clock className="w-4 h-4" /> 04 / Launch Timeline
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> 04 / Launch Timeline</span>
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6">
-              <div className="relative border-l border-ldna-grid ml-3 space-y-8">
+            <div className="bg-ldna-panel/40 border border-ldna-grid p-6 md:p-8">
+              <div className="relative border-l border-ldna-grid/50 ml-3 space-y-10">
                 {data.timeline.map((event, i) => (
-                  <div key={i} className="relative pl-8">
-                    <div className={`absolute -left-1.5 top-1.5 w-3 h-3 rounded-full ${
-                      event.severity === 'danger' ? 'bg-ldna-accent' : 
+                  <div key={i} className="relative pl-8 group">
+                    <div className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-none rotate-45 ${
+                      event.severity === 'danger' ? 'bg-ldna-accent shadow-[0_0_10px_rgba(255,87,26,0.5)]' : 
                       event.severity === 'warning' ? 'bg-ldna-warning' : 'bg-ldna-muted'
                     }`} />
-                    <div className="text-xs font-mono text-ldna-muted mb-1">{event.time}</div>
-                    <div className="font-bold text-ldna-text mb-1">{event.label}</div>
-                    <div className="text-sm text-ldna-muted">{event.detail}</div>
+                    <div className="text-xs font-mono text-ldna-muted mb-1.5 group-hover:text-ldna-text transition-colors">{event.time}</div>
+                    <div className="font-bold text-ldna-text mb-1.5 text-lg">{event.label}</div>
+                    <div className="text-sm text-ldna-muted/80">{event.detail}</div>
                   </div>
                 ))}
               </div>
@@ -127,16 +141,17 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
           
           {/* Section 05: Holder Concentration */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Users className="w-4 h-4" /> 05 / Top Holders
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span className="flex items-center gap-2"><Users className="w-4 h-4" /> 05 / Top Holders</span>
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
               <div className="space-y-4">
                 {data.holders.map((holder, i) => (
-                  <div key={i} className="flex items-center justify-between">
+                  <div key={i} className="flex items-center justify-between group">
                     <div className="flex flex-col">
-                      <span className="font-mono text-sm text-ldna-text">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
-                      {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent">{holder.tag}</span>}
+                      <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
+                      {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
                     </div>
                     <div className="font-mono font-bold text-ldna-text">{holder.percentage}%</div>
                   </div>
@@ -147,23 +162,24 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
 
           {/* Section 06: Trade Pressure */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Activity className="w-4 h-4" /> 06 / Trade Pressure
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+              <span className="flex items-center gap-2"><Activity className="w-4 h-4" /> 06 / Trade Pressure</span>
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <div className="text-xs font-mono text-ldna-muted mb-1 uppercase">Total Buys</div>
-                  <div className="font-mono text-xl text-green-500">{data.trades.buys}</div>
+                  <div className="text-xs font-mono text-ldna-muted mb-1.5 uppercase">Total Buys</div>
+                  <div className="font-mono text-2xl text-green-500">{data.trades.buys}</div>
                 </div>
                 <div>
-                  <div className="text-xs font-mono text-ldna-muted mb-1 uppercase">Total Sells</div>
-                  <div className="font-mono text-xl text-ldna-accent">{data.trades.sells}</div>
+                  <div className="text-xs font-mono text-ldna-muted mb-1.5 uppercase">Total Sells</div>
+                  <div className="font-mono text-2xl text-ldna-accent">{data.trades.sells}</div>
                 </div>
               </div>
-              <div className="w-full h-2 bg-ldna-grid flex">
-                <div className="h-full bg-green-500" style={{ width: `${(data.trades.buys / (data.trades.buys + data.trades.sells)) * 100}%` }} />
-                <div className="h-full bg-ldna-accent flex-1" />
+              <div className="w-full h-2 bg-ldna-grid flex overflow-hidden">
+                <div className="h-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.3)]" style={{ width: `${(data.trades.buys / (data.trades.buys + data.trades.sells)) * 100}%` }} />
+                <div className="h-full bg-ldna-accent/80 shadow-[0_0_10px_rgba(255,87,26,0.3)] flex-1" />
               </div>
             </div>
           </section>
@@ -171,19 +187,21 @@ export default function CaseFilePage({ params: _params }: { params: Promise<{ ad
           {/* Section 07: Proof */}
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Database className="w-4 h-4" /> 07 / API Proof
+              <Database className="w-4 h-4" /> 07 / API Evidence Log
             </h2>
-            <div className="bg-ldna-panel border border-ldna-grid p-6">
-              <div className="space-y-3">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-6 relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 w-16 h-16 bg-ldna-accent/10 rounded-full blur-xl" />
+              <div className="space-y-3 relative z-10">
                 {data.endpointProof.map((proof, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="font-mono text-ldna-muted">{proof.endpoint}</span>
-                    <span className="font-mono bg-ldna-grid px-2 py-0.5 text-xs">{proof.calls}x</span>
+                  <div key={i} className="flex items-center justify-between text-sm group">
+                    <span className="font-mono text-ldna-muted group-hover:text-ldna-text transition-colors">{proof.endpoint}</span>
+                    <span className="font-mono bg-ldna-bg border border-ldna-grid group-hover:border-ldna-accent/30 px-2 py-0.5 text-xs text-ldna-accent">{proof.calls}x</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-4 border-t border-ldna-grid text-xs text-ldna-muted text-center font-mono">
-                Powered by Birdeye Data API
+              <div className="mt-6 pt-4 border-t border-ldna-grid text-xs text-ldna-text/50 text-center font-mono flex items-center justify-center gap-2">
+                <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full" />
+                Verified via Birdeye API
               </div>
             </div>
           </section>
