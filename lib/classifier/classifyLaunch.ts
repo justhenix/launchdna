@@ -1,4 +1,5 @@
 import { MOCK_LAUNCH_CASE } from "@/lib/mock/launch-case";
+import { isReadableTokenText, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 import type {
   EvidenceSeverity,
   LaunchArchetype,
@@ -9,6 +10,8 @@ type JsonRecord = Record<string, unknown>;
 
 type ClassifyLaunchInput = {
   address: string;
+  name?: string;
+  symbol?: string;
   overview?: unknown;
   security?: unknown;
   ohlcv?: unknown;
@@ -23,6 +26,28 @@ type NormalizedTrade = {
   side: "buy" | "sell" | "unknown";
   time?: number;
   volumeUsd: number;
+};
+
+type NormalizedChart = {
+  chart: LaunchCase["chart"];
+  hasOhlcvData: boolean;
+};
+
+type TradeStats = {
+  buys: number;
+  sells: number;
+  earlyBuyCompression: number;
+  buyClusterDensity: number;
+  buyVolumeUsd: number;
+  sellVolumeUsd: number;
+  hasTradeData: boolean;
+  hasTimedTrades: boolean;
+};
+
+type DataQuality = {
+  hasHolderData: boolean;
+  hasTradeData: boolean;
+  hasOhlcvData: boolean;
 };
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -110,9 +135,32 @@ function asPercent(value: unknown, fallback = 0) {
   return clamp(Math.abs(numeric) <= 1 ? numeric * 100 : numeric);
 }
 
+export function safeNumber(value: unknown, fallback = 0) {
+  const numeric = toNumber(value);
+  return numeric === undefined ? fallback : numeric;
+}
+
+export function clampPercent(value: unknown) {
+  return clamp(safeNumber(value), 0, 100);
+}
+
+export function normalizeHolderShare(value: unknown, fallback = 0) {
+  const numeric = toNumber(value);
+  if (numeric === undefined) {
+    return clampPercent(fallback);
+  }
+
+  return clampPercent(Math.abs(numeric) <= 1 ? numeric * 100 : numeric);
+}
+
 function round(value: number, digits = 0) {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
+}
+
+export function formatPercent(value: unknown, digits = 0) {
+  const rounded = round(clampPercent(value), digits);
+  return `${rounded}%`;
 }
 
 function extractArray(value: unknown): JsonRecord[] {
@@ -152,7 +200,15 @@ function timeLabel(value: unknown, fallbackIndex: number) {
   return Number.isNaN(date.getTime()) ? `Minute ${fallbackIndex + 1}` : date.toISOString().slice(11, 16);
 }
 
-function normalizeChart(ohlcv: unknown): LaunchCase["chart"] {
+function neutralChart(): LaunchCase["chart"] {
+  return Array.from({ length: 60 }).map((_, index) => ({
+    time: `Minute ${index + 1}`,
+    price: 1,
+    volume: 0,
+  }));
+}
+
+function normalizeChart(ohlcv: unknown): NormalizedChart {
   const rows = extractArray(ohlcv);
   const chart = rows
     .map((row, index) => ({
@@ -164,14 +220,16 @@ function normalizeChart(ohlcv: unknown): LaunchCase["chart"] {
     .slice(-60);
 
   if (chart.length > 0) {
-    return chart;
+    return {
+      chart,
+      hasOhlcvData: true,
+    };
   }
 
-  return Array.from({ length: 60 }).map((_, index) => ({
-    time: `Minute ${index + 1}`,
-    price: round(0.01 + index * 0.0002, 6),
-    volume: 1000 + index * 20,
-  }));
+  return {
+    chart: neutralChart(),
+    hasOhlcvData: false,
+  };
 }
 
 function tradeSide(row: JsonRecord): NormalizedTrade["side"] {
@@ -213,22 +271,83 @@ function normalizeTrades(txs: unknown): NormalizedTrade[] {
   return extractArray(txs).map((row) => ({
     side: tradeSide(row),
     time: normalizeTradeTime(row),
-    volumeUsd: firstNumber(row, [
+    volumeUsd: Math.max(0, firstNumber(row, [
       "volumeUSD",
       "volume_usd",
       "amountUsd",
       "amount_usd",
       "valueUsd",
       "value",
-    ]) ?? 0,
+    ]) ?? 0),
   }));
 }
 
+function holderAddress(row: JsonRecord) {
+  return firstString(row, [
+    "owner",
+    "address",
+    "wallet",
+    "walletAddress",
+    "wallet_address",
+    "holder",
+    "ownerAddress",
+    "owner_address",
+    "holderAddress",
+    "holder_address",
+  ]);
+}
+
+function holderTag(row: JsonRecord) {
+  return firstStringOrList(row, [
+    "tag",
+    "label",
+    "labels",
+    "tags",
+    "nameTag",
+    "name_tag",
+    "addressLabel",
+    "address_label",
+    "ownerName",
+    "owner_name",
+  ]);
+}
+
+function capHolderShares(holders: LaunchCase["holders"]) {
+  const capped = holders.map((holder) => ({
+    ...holder,
+    percentage: round(clampPercent(holder.percentage), 2),
+  }));
+  const total = capped.reduce((sum, holder) => sum + holder.percentage, 0);
+
+  if (total <= 100 || total <= 0) {
+    return capped;
+  }
+
+  let remaining = 100;
+
+  return capped.map((holder, index) => {
+    const scaled = index === capped.length - 1
+      ? remaining
+      : Math.min(round((holder.percentage / total) * 100, 2), remaining);
+    remaining = round(Math.max(0, remaining - scaled), 2);
+
+    return {
+      ...holder,
+      percentage: scaled,
+    };
+  });
+}
+
 function normalizeHolders(holders: unknown, security: unknown): LaunchCase["holders"] {
-  const top10FromSecurity = asPercent(field(security, ["top10HolderPercent", "top10HolderPercentage"]), 0);
+  const top10FromSecurity = normalizeHolderShare(field(security, ["top10HolderPercent", "top10HolderPercentage"]), 0);
   const rows = extractArray(holders).slice(0, 10);
 
-  return rows.map((row, index) => {
+  const normalized = rows.flatMap((row) => {
+    const address = holderAddress(row);
+    if (!address) {
+      return [];
+    }
+
     const explicitPercent = field(row, [
       "percentage",
       "percent",
@@ -245,23 +364,16 @@ function normalizeHolders(holders: unknown, security: unknown): LaunchCase["hold
       "percent_of_supply",
     ]);
     const fallbackPercent = rows.length > 0 && top10FromSecurity > 0 ? top10FromSecurity / rows.length : 0;
-    const tag = firstStringOrList(row, ["tag", "label", "labels", "tags", "nameTag", "ownerName", "type"]);
+    const tag = holderTag(row);
 
-    return {
-      address: firstString(row, [
-        "owner",
-        "address",
-        "wallet",
-        "holder",
-        "ownerAddress",
-        "owner_address",
-        "holderAddress",
-        "holder_address",
-      ]) ?? `Holder ${index + 1}`,
-      percentage: round(asPercent(explicitPercent, fallbackPercent), 2),
+    return [{
+      address,
+      percentage: round(normalizeHolderShare(explicitPercent, fallbackPercent), 2),
       ...(tag ? { tag } : {}),
-    };
+    }];
   });
+
+  return capHolderShares(normalized);
 }
 
 function mergeHolderEvidence(
@@ -284,7 +396,7 @@ function mergeHolderEvidence(
     }
   }
 
-  return merged.slice(0, 10);
+  return capHolderShares(merged.slice(0, 10));
 }
 
 function securityFlagCount(security: unknown) {
@@ -331,16 +443,16 @@ function severityFromScore(score: number): EvidenceSeverity {
   return "good";
 }
 
-function summaryFor(archetype: LaunchArchetype, metrics: LaunchCase["metrics"]) {
+function summaryFor(archetype: LaunchArchetype, metrics: LaunchCase["metrics"], quality: DataQuality) {
   if (archetype === "Sniper Swarm") {
-    return `Launch shows compressed early buying, ${round(metrics.top10HolderConcentration)}% top-holder concentration, and fast spike behavior.`;
+    return `Launch shows ${quality.hasTradeData ? "observed" : "insufficient"} early-buy compression, ${quality.hasHolderData ? formatPercent(metrics.top10HolderConcentration) : "insufficient"} holder concentration, and ${quality.hasOhlcvData ? "observed" : "insufficient"} spike evidence.`;
   }
 
   if (archetype === "Liquidity Mirage") {
-    return `Launch shows early volume shock, ${round(metrics.sellPressure)}% sell pressure, and price weakness after initial activity.`;
+    return `Launch shows ${quality.hasOhlcvData ? "observed/proxy" : "insufficient"} volume shock evidence, ${formatPercent(metrics.sellPressure)} sell pressure, and ${quality.hasOhlcvData ? "observed" : "insufficient"} price weakness evidence.`;
   }
 
-  return `Launch shows smoother price action, lower concentration, and balanced buy/sell behavior compared with sniper or liquidity-shock patterns.`;
+  return `Available data shows smoother price action, lower holder concentration, and ${quality.hasTradeData ? "observed" : "insufficient"} buy/sell balance compared with sniper or liquidity-shock patterns.`;
 }
 
 function dominantArchetype(scores: LaunchCase["scores"]): LaunchArchetype {
@@ -380,24 +492,15 @@ function chartStats(chart: LaunchCase["chart"]) {
   };
 }
 
-function tradeStats(trades: NormalizedTrade[]) {
-  let buys = trades.filter((trade) => trade.side === "buy").length;
-  let sells = trades.filter((trade) => trade.side === "sell").length;
-
-  if (buys + sells === 0 && trades.length > 0) {
-    buys = Math.ceil(trades.length / 2);
-    sells = Math.floor(trades.length / 2);
-  }
-
-  if (buys + sells === 0) {
-    buys = 1;
-    sells = 1;
-  }
+function tradeStats(trades: NormalizedTrade[]): TradeStats {
+  const buys = trades.filter((trade) => trade.side === "buy").length;
+  const sells = trades.filter((trade) => trade.side === "sell").length;
+  const hasTradeData = buys + sells > 0;
 
   const timedTrades = trades.filter((trade) => trade.time !== undefined);
   const firstTradeTime = timedTrades.length > 0 ? Math.min(...timedTrades.map((trade) => trade.time ?? 0)) : undefined;
   const firstHourTrades = firstTradeTime === undefined
-    ? timedTrades
+    ? []
     : timedTrades.filter((trade) => (trade.time ?? 0) <= firstTradeTime + 3600);
   const firstHourBuys = firstHourTrades.filter((trade) => trade.side === "buy");
   const earlyBuys = firstTradeTime === undefined
@@ -424,6 +527,8 @@ function tradeStats(trades: NormalizedTrade[]) {
     sellVolumeUsd: trades
       .filter((trade) => trade.side === "sell")
       .reduce((sum, trade) => sum + trade.volumeUsd, 0),
+    hasTradeData,
+    hasTimedTrades: timedTrades.length > 0,
   };
 }
 
@@ -435,12 +540,15 @@ export function createMockLaunchCase(
   address: string,
   endpointProof: LaunchCase["endpointProof"] = MOCK_LAUNCH_CASE.endpointProof,
   dataMode: LaunchCase["dataMode"] = "mock",
+  metadata: { name?: string; symbol?: string } = {},
 ): LaunchCase {
   return {
     ...MOCK_LAUNCH_CASE,
     token: {
       ...MOCK_LAUNCH_CASE.token,
       address: address || MOCK_LAUNCH_CASE.token.address,
+      name: metadata.name ?? MOCK_LAUNCH_CASE.token.name,
+      symbol: metadata.symbol ?? MOCK_LAUNCH_CASE.token.symbol,
     },
     evidence: MOCK_LAUNCH_CASE.evidence.map((item) => ({ ...item })),
     chart: MOCK_LAUNCH_CASE.chart.map((item) => ({ ...item })),
@@ -455,7 +563,8 @@ export function createMockLaunchCase(
 export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   const overview = isRecord(input.overview) ? input.overview : {};
   const security = isRecord(input.security) ? input.security : {};
-  const chart = normalizeChart(input.ohlcv);
+  const chartResult = normalizeChart(input.ohlcv);
+  const chart = chartResult.chart;
   const normalizedHolders = normalizeHolders(input.holders, security);
   const taggedHolders = normalizeHolders(input.holderPositions, security);
   const holders = normalizedHolders.length > 0
@@ -465,12 +574,13 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   const tradeMetrics = tradeStats(trades);
   const priceMetrics = chartStats(chart);
   const top10HolderConcentration = holders.length > 0
-    ? holders.slice(0, 10).reduce((sum, holder) => sum + holder.percentage, 0)
-    : asPercent(field(security, ["top10HolderPercent", "top10HolderPercentage"]), 0);
+    ? clampPercent(holders.slice(0, 10).reduce((sum, holder) => sum + holder.percentage, 0))
+    : normalizeHolderShare(field(security, ["top10HolderPercent", "top10HolderPercentage"]), 0);
   const flaggedHolderCount = holderTagFlags(holders) + securityFlagCount(security);
   const totalTrades = trades.length;
   const totalHolders = firstNumber(overview, ["holder", "holderCount", "holders", "numberHolders"]) ?? holders.length;
-  const sellPressure = ((tradeMetrics.sells / (tradeMetrics.buys + tradeMetrics.sells)) * 100);
+  const tradeSideCount = tradeMetrics.buys + tradeMetrics.sells;
+  const sellPressure = tradeSideCount > 0 ? (tradeMetrics.sells / tradeSideCount) * 100 : 0;
   const buySellRatio = tradeMetrics.sells === 0 ? tradeMetrics.buys : tradeMetrics.buys / tradeMetrics.sells;
   const liquidityShock = clamp(
     priceMetrics.collapse * 0.45 +
@@ -480,12 +590,12 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   const weakHolderQuality = clamp(top10HolderConcentration + flaggedHolderCount * 12);
 
   const metrics: LaunchCase["metrics"] = {
-    earlyBuyCompression: round(tradeMetrics.earlyBuyCompression),
+    earlyBuyCompression: round(clampPercent(tradeMetrics.earlyBuyCompression)),
     top10HolderConcentration: round(top10HolderConcentration, 1),
     buySellRatio: round(buySellRatio, 2),
-    priceChange1h: round(firstNumber(overview, ["priceChange1hPercent", "priceChange1h"]) ?? priceMetrics.priceChange1h, 2),
-    sellPressure: round(sellPressure),
-    liquidityShock: round(liquidityShock),
+    priceChange1h: round(clamp(firstNumber(overview, ["priceChange1hPercent", "priceChange1h"]) ?? priceMetrics.priceChange1h, -100, 100), 2),
+    sellPressure: round(clampPercent(sellPressure)),
+    liquidityShock: round(clampPercent(liquidityShock)),
     flaggedHolderCount,
     totalTrades,
     totalHolders: Math.round(totalHolders),
@@ -517,52 +627,80 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   };
 
   const archetype = dominantArchetype(scores);
-  const confidence = clamp(Math.max(scores.sniperSwarm, scores.liquidityMirage, scores.organicGrind), 55, 95);
+  const hasHolderData = holders.length > 0;
+  const quality = {
+    hasHolderData,
+    hasTradeData: tradeMetrics.hasTradeData,
+    hasOhlcvData: chartResult.hasOhlcvData,
+  };
+  const dataQuality = [quality.hasHolderData, quality.hasTradeData, quality.hasOhlcvData].filter(Boolean).length;
+  const confidenceCap = dataQuality === 3 ? 95 : dataQuality === 2 ? 89 : dataQuality === 1 ? 76 : 65;
+  const confidence = clamp(Math.max(scores.sniperSwarm, scores.liquidityMirage, scores.organicGrind), 55, confidenceCap);
   const securityFlagsDetected = flaggedHolderCount > 0 ? "Detected" : "None";
+  const holderEvidenceText = hasHolderData
+    ? "Observed from Birdeye holder rows; security concentration used only as fallback."
+    : "Insufficient holder rows; concentration uses Birdeye security proxy when present.";
+  const tradeEvidenceText = tradeMetrics.hasTradeData
+    ? `${tradeMetrics.buys} observed buys vs ${tradeMetrics.sells} observed sells in normalized Birdeye trade data.`
+    : "Insufficient Birdeye trade rows; neutral trade pressure used.";
+  const ohlcvEvidenceText = chartResult.hasOhlcvData
+    ? "Proxy combines observed OHLCV movement, early volume, and trade pressure."
+    : "Insufficient OHLCV rows; neutral chart fallback used and confidence capped.";
+
+  const overviewName = firstString(overview, ["name", "tokenName"]);
+  const overviewSymbol = firstString(overview, ["symbol", "tokenSymbol"]);
+  const preferredName = isReadableTokenText(overviewName) ? overviewName : input.name;
+  const preferredSymbol = isReadableTokenText(overviewSymbol) ? overviewSymbol : input.symbol;
+  const safeName = sanitizeTokenName(preferredName, preferredSymbol, input.address);
+  const safeSymbol = sanitizeTokenSymbol(preferredSymbol, preferredName, input.address);
 
   return {
     token: {
       address: firstString(overview, ["address", "tokenAddress"]) ?? input.address,
-      name: firstString(overview, ["name", "tokenName"]) ?? "Unknown Token",
-      symbol: firstString(overview, ["symbol", "tokenSymbol"]) ?? "UNKNOWN",
+      name: safeName,
+      symbol: safeSymbol,
       chain: "solana",
       logoURI: firstString(overview, ["logoURI", "logoUri", "logo", "icon"]),
     },
     classification: {
       archetype,
       confidence: Math.round(confidence),
-      summary: summaryFor(archetype, metrics),
+      summary: summaryFor(archetype, metrics, quality),
     },
     evidence: [
       {
         label: "Early Buy Compression",
-        value: `${metrics.earlyBuyCompression}%`,
+        value: formatPercent(metrics.earlyBuyCompression),
         severity: severityFromScore(metrics.earlyBuyCompression),
-        explanation: `${metrics.earlyBuyCompression}% of first-hour buys clustered into the first 3 minutes when timestamps were available.`,
+        explanation: tradeMetrics.hasTimedTrades
+          ? `${formatPercent(metrics.earlyBuyCompression)} of observed first-hour buys clustered into the first 3 minutes.`
+          : "Insufficient Birdeye timestamps; neutral early-buy compression used.",
       },
       {
         label: "Top 10 Holder Concentration",
-        value: `${metrics.top10HolderConcentration}%`,
+        value: formatPercent(metrics.top10HolderConcentration, 1),
         severity: severityFromScore(metrics.top10HolderConcentration),
-        explanation: "Top holder share estimated from holder endpoint, with security endpoint as fallback.",
+        explanation: holderEvidenceText,
       },
       {
         label: "Trade Pressure",
         value: netPressure(tradeMetrics.buys, tradeMetrics.sells).toUpperCase(),
         severity: severityFromScore(metrics.sellPressure),
-        explanation: `${tradeMetrics.buys} buys vs ${tradeMetrics.sells} sells in normalized Birdeye trade data.`,
+        explanation: tradeEvidenceText,
       },
       {
         label: "Liquidity Shock Proxy",
-        value: `${metrics.liquidityShock}%`,
+        value: formatPercent(metrics.liquidityShock),
         severity: severityFromScore(metrics.liquidityShock),
-        explanation: "Proxy combines price collapse, early volume spike, and sell pressure because pool-level liquidity history may be absent.",
+        explanation: ohlcvEvidenceText,
       },
       {
         label: "Security Flags",
         value: securityFlagsDetected,
         severity: flaggedHolderCount > 2 ? "danger" : flaggedHolderCount > 0 ? "warning" : "good",
-        explanation: `${flaggedHolderCount} holder tags or token security fields indicated elevated risk.`,
+        explanation: flaggedHolderCount > 0
+          ? `${flaggedHolderCount} observed Birdeye holder tags or token security fields indicated elevated risk.`
+          : "No Birdeye holder tags or token security fields indicated elevated risk.",
       },
     ],
     metrics,
@@ -578,19 +716,23 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
       {
         time: "3m",
         label: "Early Buy Window",
-        detail: `${metrics.earlyBuyCompression}% early buy compression detected.`,
+        detail: tradeMetrics.hasTimedTrades
+          ? `${formatPercent(metrics.earlyBuyCompression)} observed early buy compression.`
+          : "Insufficient trade timestamps for early buy compression.",
         severity: severityFromScore(metrics.earlyBuyCompression),
       },
       {
         time: `${priceMetrics.peakIndex + 1}m`,
         label: "Price Peak",
-        detail: `${round(priceMetrics.fastSpike)}% fast spike score before post-peak action.`,
+        detail: chartResult.hasOhlcvData
+          ? `${formatPercent(priceMetrics.fastSpike)} observed fast spike score before post-peak action.`
+          : "Insufficient OHLCV data for peak replay.",
         severity: severityFromScore(priceMetrics.fastSpike),
       },
       {
         time: "60m",
         label: "Closeout",
-        detail: `${round(metrics.priceChange1h, 2)}% price change with ${metrics.sellPressure}% sell pressure.`,
+        detail: `${round(metrics.priceChange1h, 2)}% price change with ${formatPercent(metrics.sellPressure)} observed/proxy sell pressure.`,
         severity: metrics.priceChange1h < -25 ? "danger" : metrics.priceChange1h < 0 ? "warning" : "good",
       },
     ],
@@ -604,6 +746,6 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     },
     endpointProof: cloneEndpointProof(input.endpointProof),
     generatedAt: new Date().toISOString(),
-    dataMode: input.dataMode,
+    dataMode: input.dataMode === "live" && dataQuality === 3 ? "live" : input.dataMode === "mock" ? "mock" : "partial",
   };
 }

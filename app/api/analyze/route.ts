@@ -19,6 +19,10 @@ function normalizeAddress(value: unknown) {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : MOCK_ADDRESS;
 }
 
+function normalizeOptionalString(value: unknown) {
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined;
+}
+
 function field(record: unknown, keys: string[]) {
   if (!isRecord(record)) {
     return undefined;
@@ -102,15 +106,21 @@ function isLikelySolanaAddress(address: string) {
 
 export async function POST(request: Request) {
   let address = MOCK_ADDRESS;
+  let name: string | undefined;
+  let symbol: string | undefined;
 
   try {
     const body = await request.json().catch(() => ({}));
-    address = normalizeAddress(isRecord(body) ? body.address : undefined);
+    if (isRecord(body)) {
+      address = normalizeAddress(body.address);
+      name = normalizeOptionalString(body.name);
+      symbol = normalizeOptionalString(body.symbol);
+    }
     const client = new BirdeyeClient();
 
     if (!client.hasApiKey() || address === "mock-token" || !isLikelySolanaAddress(address)) {
       const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock"));
+      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
     }
 
     const results: BirdeyeRequestResult[] = [];
@@ -138,11 +148,13 @@ export async function POST(request: Request) {
     const liveCount = results.filter((result) => result.ok).length;
 
     if (liveCount === 0) {
-      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock"));
+      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
     }
 
     return NextResponse.json(classifyLaunch({
       address,
+      name,
+      symbol,
       overview: overview.data,
       security: security.data,
       ohlcv: ohlcv.data,
@@ -154,6 +166,6 @@ export async function POST(request: Request) {
     }));
   } catch {
     const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-    return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock"));
+    return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
   }
 }

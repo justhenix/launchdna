@@ -5,16 +5,26 @@ import { LaunchCase } from "@/types/launch-case";
 import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+const ANALYZE_TIMEOUT_MS = 25_000;
 
 export default function CaseFilePage({ params }: { params: Promise<{ address: string }> }) {
   const resolvedParams = use(params);
   const address = resolvedParams.address;
+  const searchParams = useSearchParams();
+  const tokenName = searchParams.get("name")?.trim() || undefined;
+  const tokenSymbol = searchParams.get("symbol")?.trim() || undefined;
   
   const [data, setData] = useState<LaunchCase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), ANALYZE_TIMEOUT_MS);
+
     async function fetchData() {
       setIsLoading(true);
       setError(null);
@@ -22,23 +32,40 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address }),
+          body: JSON.stringify({ address, name: tokenName, symbol: tokenSymbol }),
+          signal: controller.signal,
         });
         
         if (!res.ok) throw new Error("Failed to fetch case data");
         
         const result = await res.json();
-        setData(result);
+        if (isActive) {
+          setData(result);
+        }
       } catch (err) {
+        if (!isActive) {
+          return;
+        }
         console.error(err);
-        setError("Unable to retrieve forensic data. The token may be too new or the address is invalid.");
+        setError(err instanceof DOMException && err.name === "AbortError"
+          ? "Analysis timed out. Birdeye data may be sparse for this token; retry or use another listing."
+          : "Unable to retrieve forensic data. The token may be too new or the address is invalid.");
       } finally {
-        setIsLoading(false);
+        if (isActive) {
+          window.clearTimeout(timeout);
+          setIsLoading(false);
+        }
       }
     }
 
     fetchData();
-  }, [address]);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [address, tokenName, tokenSymbol]);
 
   if (isLoading) {
     return (
@@ -83,6 +110,9 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       </div>
     );
   }
+
+  const tradeTotal = data.trades.buys + data.trades.sells;
+  const buyShare = tradeTotal > 0 ? Math.min(100, Math.max(0, (data.trades.buys / tradeTotal) * 100)) : 50;
 
   return (
     <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
@@ -231,7 +261,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                       <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
                       {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
                     </div>
-                    <div className="font-mono font-bold text-ldna-text">{holder.percentage}%</div>
+                    <div className="font-mono font-bold text-ldna-text">{Math.min(100, Math.max(0, holder.percentage))}%</div>
                   </div>
                 ))}
               </div>
@@ -256,7 +286,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                 </div>
               </div>
               <div className="w-full h-2 bg-ldna-grid flex overflow-hidden">
-                <div className="h-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.3)]" style={{ width: `${(data.trades.buys / (data.trades.buys + data.trades.sells)) * 100}%` }} />
+                <div className="h-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.3)]" style={{ width: `${buyShare}%` }} />
                 <div className="h-full bg-ldna-accent/80 shadow-[0_0_10px_rgba(255,87,26,0.3)] flex-1" />
               </div>
             </div>

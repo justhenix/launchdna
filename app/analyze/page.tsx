@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, Activity, Clock, Loader2 } from "lucide-react";
+import type { NewListingFeedItem } from "@/types/launch-case";
+import { dedupeListings, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 
 export default function AnalyzePage() {
   const router = useRouter();
@@ -35,24 +37,45 @@ export default function AnalyzePage() {
     }
   };
 
-  const [liveFeed, setLiveFeed] = useState<any[]>([]);
+  const [liveFeed, setLiveFeed] = useState<NewListingFeedItem[]>([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
+    const controller = new AbortController();
     async function fetchFeed() {
       try {
-        const res = await fetch("/api/new-listings");
+        const res = await fetch("/api/new-listings", { signal: controller.signal });
         if (res.ok) {
           const result = await res.json();
-          setLiveFeed(result.tokens);
+          if (isActive) {
+            const sanitized = dedupeListings((result.tokens ?? []).map((token: NewListingFeedItem) => {
+              const name = sanitizeTokenName(token.name, token.symbol, token.address);
+              const symbol = sanitizeTokenSymbol(token.symbol, token.name, token.address);
+
+              return {
+                ...token,
+                name,
+                symbol,
+              };
+            }));
+            setLiveFeed(sanitized);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch feed:", err);
       } finally {
-        setIsLoadingFeed(false);
+        if (isActive) {
+          setIsLoadingFeed(false);
+        }
       }
     }
     fetchFeed();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
   }, []);
 
   return (
@@ -128,7 +151,7 @@ export default function AnalyzePage() {
           ) : liveFeed.length > 0 ? (
             liveFeed.map((token, i) => (
               <Link 
-                href={`/case/${token.address}`} 
+                href={`/case/${encodeURIComponent(token.address)}?name=${encodeURIComponent(token.name ?? "")}&symbol=${encodeURIComponent(token.symbol ?? "")}`} 
                 key={i}
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-ldna-panel/40 border border-ldna-grid hover:border-ldna-accent/50 hover:bg-ldna-panel/80 transition-all duration-300 group"
               >
@@ -140,7 +163,7 @@ export default function AnalyzePage() {
                   <div>
                     <div className="font-bold text-lg mb-1">{token.symbol}</div>
                     <div className="flex items-center gap-4 text-xs font-mono text-ldna-muted">
-                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {token.age} old</span>
+                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {token.age ?? "new"}</span>
                       <span className="text-ldna-text/70">Vol: {token.volume}</span>
                     </div>
                   </div>

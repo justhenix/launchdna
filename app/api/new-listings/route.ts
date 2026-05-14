@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { BirdeyeClient } from "@/lib/birdeye/client";
 import { BIRDEYE_ENDPOINTS } from "@/lib/birdeye/endpoints";
+import { dedupeListings } from "@/lib/listings";
 import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
 import type { NewListingFeedItem, NewListingsResponse } from "@/types/launch-case";
 
@@ -16,6 +17,8 @@ const MOCK_TOKENS: NewListingFeedItem[] = [
   { symbol: "CAT", name: "Mock CAT", age: "45m", volume: "$400K", archetype: "Organic Grind", address: "mock-cat", isSafe: true },
   { symbol: "MOON", name: "Mock MOON", age: "58m", volume: "$2.1M", archetype: "Liquidity Mirage", address: "mock-moon", isDanger: true },
 ];
+
+const MAX_LISTINGS = 12;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -130,23 +133,36 @@ function usd(value?: number) {
 }
 
 function normalizeListings(data: unknown): NewListingFeedItem[] {
-  return extractRows(data).slice(0, 12).map((row, index) => {
-    const createdAt = toIsoTime(row);
-    const symbol = stringField(row, ["symbol", "tokenSymbol", "token_symbol"]) ?? `TOKEN${index + 1}`;
+  return extractRows(data).slice(0, 50).flatMap((row) => {
+    const address = stringField(row, [
+      "address",
+      "tokenAddress",
+      "token_address",
+      "mint",
+      "mintAddress",
+      "mint_address",
+      "tokenMint",
+      "token_mint",
+    ]);
+    const symbol = stringField(row, ["symbol", "tokenSymbol", "token_symbol"]);
+    const name = stringField(row, ["name", "tokenName", "token_name"]);
 
-    return {
-      address: stringField(row, [
-        "address",
-        "tokenAddress",
-        "token_address",
-        "mint",
-        "mintAddress",
-        "mint_address",
-        "tokenMint",
-        "token_mint",
-      ]) ?? `mock-token-${index + 1}`,
-      name: stringField(row, ["name", "tokenName", "token_name"]) ?? symbol,
-      symbol,
+    if (!address || (!symbol && !name)) {
+      return [];
+    }
+
+    const createdAt = toIsoTime(row);
+    const safeSymbol = symbol ?? name ?? "";
+    const safeName = name ?? symbol ?? safeSymbol;
+
+    if (!safeSymbol || !safeName) {
+      return [];
+    }
+
+    return [{
+      address,
+      name: safeName,
+      symbol: safeSymbol,
       createdAt,
       age: ageFromIso(createdAt),
       volume: usd(numberField(row, [
@@ -162,7 +178,7 @@ function normalizeListings(data: unknown): NewListingFeedItem[] {
         "liquidity_usd",
       ])),
       archetype: "Evaluating...",
-    };
+    }];
   });
 }
 
@@ -181,14 +197,15 @@ export async function GET() {
       return NextResponse.json(response);
     }
 
-    const result = await client.getNewListings(12);
+    const result = await client.getNewListings(MAX_LISTINGS);
     const endpointProof = buildEndpointProof([result], [BIRDEYE_ENDPOINTS.newListings]);
-    const tokens = result.ok ? normalizeListings(result.data) : [];
+    const tokens = result.ok ? dedupeListings(normalizeListings(result.data)).slice(0, MAX_LISTINGS) : [];
+    const hasLiveTokens = result.ok && tokens.length > 0;
     const response: NewListingsResponse = {
-      tokens: tokens.length > 0 ? tokens : MOCK_TOKENS,
+      tokens: hasLiveTokens ? tokens : MOCK_TOKENS,
       endpointProof,
       generatedAt: new Date().toISOString(),
-      dataMode: result.ok && tokens.length > 0 ? "live" : "mock",
+      dataMode: hasLiveTokens ? "live" : "mock",
     };
 
     return NextResponse.json(response);
