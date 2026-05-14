@@ -39,7 +39,7 @@ function createPartialFallbackCase(
     classification: {
       archetype: "Organic Grind",
       confidence: 60,
-      summary: "Partial evidence available. Token may be too new for complete Birdeye history.",
+      summary: "Partial evidence available. This token may be too new for complete Birdeye history.",
     },
     evidence: [
       {
@@ -124,9 +124,12 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           signal: controller.signal,
         });
         
-        if (!res.ok) throw new Error("Failed to fetch case data");
-        
-        const result = await res.json();
+        const result = await res.json().catch(() => undefined);
+        if (!res.ok) {
+          setData(createPartialFallbackCase(address, tokenName, tokenSymbol, result?.endpointProof));
+          return;
+        }
+
         if (isActive) {
           setData(result);
         }
@@ -198,6 +201,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
     );
   }
 
+  if (!data) {
+    return null;
+  }
+
   const tradeTotal = data.trades.buys + data.trades.sells;
   const buyShare = tradeTotal > 0 ? Math.min(100, Math.max(0, (data.trades.buys / tradeTotal) * 100)) : 50;
 
@@ -208,13 +215,13 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
       {data.dataMode === "partial" && (
         <div className="mb-8 border border-ldna-warning/30 bg-ldna-panel/60 px-6 py-4 text-sm font-mono text-ldna-warning">
-          Partial evidence available. Token may be too new for complete Birdeye history.
+          Partial evidence available. This token may be too new for complete Birdeye history.
         </div>
       )}
 
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-8 border-b border-ldna-grid relative">
-        <div className="absolute top-0 right-0 w-1/3 h-px bg-gradient-to-r from-transparent via-ldna-accent/50 to-transparent" />
+        <div className="absolute top-0 right-0 w-1/3 h-px bg-linear-to-r from-transparent via-ldna-accent/50 to-transparent" />
         
         <div>
           <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -233,7 +240,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
         <div className="mt-6 md:mt-0 text-left md:text-right">
           <div className="text-xs font-mono text-ldna-muted mb-2 uppercase tracking-widest">Classification Result</div>
           <div className="inline-flex items-center gap-3 px-4 py-2 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-[100%] animate-[shimmer_2s_infinite]" />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             <ShieldAlert className="w-5 h-5 text-ldna-accent" />
             <span className="font-mono font-bold text-lg text-ldna-accent uppercase tracking-wider">{data.classification.archetype}</span>
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-3">{data.classification.confidence}% CONF</span>
@@ -266,7 +273,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             </h2>
             <div className="bg-ldna-panel/60 border border-ldna-grid p-6 h-96 relative group">
               {/* Scanline effect */}
-              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-size-[100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.chart}>
                   <defs>
@@ -322,7 +329,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
               <div className="relative border-l border-ldna-grid/50 ml-3 space-y-10">
                 {data.timeline.map((event, i) => (
                   <div key={i} className="relative pl-8 group">
-                    <div className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-none rotate-45 ${
+                    <div className={`absolute -left-1.25 top-1.5 w-2.5 h-2.5 rounded-none rotate-45 ${
                       event.severity === 'danger' ? 'bg-ldna-accent shadow-[0_0_10px_rgba(255,87,26,0.5)]' : 
                       event.severity === 'warning' ? 'bg-ldna-warning' : 'bg-ldna-muted'
                     }`} />

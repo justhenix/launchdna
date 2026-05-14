@@ -85,9 +85,9 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
     { time: "60m", label: "Stagnation", detail: "Low volume sideways movement.", severity: "neutral" },
   ],
   holders: [
-    { address: "CreatorWallet...", percentage: 15, tag: "Creator" },
-    { address: "Sniper1...", percentage: 5, tag: "Suspicious" },
-    { address: "Sniper2...", percentage: 4.5, tag: "Suspicious" },
+    { address: "CreatorWallet...", percentage: 15 },
+    { address: "Sniper1...", percentage: 5 },
+    { address: "Sniper2...", percentage: 4.5 },
     { address: "Wallet4...", percentage: 4 },
     { address: "Wallet5...", percentage: 3.5 },
   ],

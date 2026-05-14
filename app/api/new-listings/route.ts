@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { BirdeyeClient } from "@/lib/birdeye/client";
 import { BIRDEYE_ENDPOINTS } from "@/lib/birdeye/endpoints";
-import { dedupeListings } from "@/lib/listings";
+import { dedupeListings, isReadableTokenText, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
 import type { NewListingFeedItem, NewListingsResponse } from "@/types/launch-case";
 
@@ -12,10 +12,10 @@ export const runtime = "nodejs";
 type JsonRecord = Record<string, unknown>;
 
 const MOCK_TOKENS: NewListingFeedItem[] = [
-  { symbol: "PEPE", name: "Mock PEPE", age: "2m", volume: "$1.2M", archetype: "Evaluating...", address: "mock-pepe" },
-  { symbol: "DOGE2", name: "Mock DOGE2", age: "12m", volume: "$5.4M", archetype: "Sniper Swarm", address: "mock-token", isDanger: true },
-  { symbol: "CAT", name: "Mock CAT", age: "45m", volume: "$400K", archetype: "Organic Grind", address: "mock-cat", isSafe: true },
-  { symbol: "MOON", name: "Mock MOON", age: "58m", volume: "$2.1M", archetype: "Liquidity Mirage", address: "mock-moon", isDanger: true },
+  { symbol: "DEMO", name: "Mock Demo", age: "2m", volume: "$1.2M", address: "mock-token" },
+  { symbol: "TRACE", name: "Mock Trace", age: "12m", volume: "$5.4M", address: "mock-trace" },
+  { symbol: "CASE", name: "Mock Case", age: "45m", volume: "$400K", address: "mock-case" },
+  { symbol: "PROOF", name: "Mock Proof", age: "58m", volume: "$2.1M", address: "mock-proof" },
 ];
 
 const MAX_LISTINGS = 12;
@@ -54,22 +54,6 @@ function stringField(record: JsonRecord, keys: string[]) {
   for (const key of keys) {
     const value = record[key];
     if (typeof value === "string" && value.trim() !== "") {
-      return value;
-    }
-  }
-
-  return undefined;
-}
-
-function nestedStringField(record: JsonRecord, parentKeys: string[], keys: string[]) {
-  for (const parentKey of parentKeys) {
-    const nested = record[parentKey];
-    if (!isRecord(nested)) {
-      continue;
-    }
-
-    const value = stringField(nested, keys);
-    if (value) {
       return value;
     }
   }
@@ -168,19 +152,17 @@ function normalizeListings(data: unknown): NewListingFeedItem[] {
     }
 
     const createdAt = toIsoTime(row);
-    const logoURI = stringField(row, ["logoURI", "logoUri", "logo", "icon", "image"])
-      ?? nestedStringField(row, ["extensions", "tokenExtensions"], ["logoURI", "logoUri", "logo", "icon", "image"]);
     const safeSymbol = symbol ?? name ?? "";
     const safeName = name ?? symbol ?? safeSymbol;
 
-    if (!safeSymbol || !safeName) {
+    if (!safeSymbol || !safeName || !isReadableTokenText(safeSymbol) || !isReadableTokenText(safeName)) {
       return [];
     }
 
     return [{
       address,
-      name: safeName,
-      symbol: safeSymbol,
+      name: sanitizeTokenName(safeName, safeSymbol, address),
+      symbol: sanitizeTokenSymbol(safeSymbol, safeName, address),
       createdAt,
       age: ageFromIso(createdAt),
       volume: usd(numberField(row, [
@@ -195,8 +177,6 @@ function normalizeListings(data: unknown): NewListingFeedItem[] {
         "liquidityUsd",
         "liquidity_usd",
       ])),
-      archetype: "Evaluating...",
-      ...(logoURI ? { logoURI } : {}),
     }];
   });
 }

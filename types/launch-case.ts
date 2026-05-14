@@ -93,7 +93,7 @@ export type NewListingFeedItem = {
   createdAt?: string;
   age?: string;
   volume?: string;
-  archetype?: LaunchArchetype | "Evaluating...";
+  archetype?: LaunchArchetype;
   isDanger?: boolean;
   isSafe?: boolean;
   logoURI?: string;

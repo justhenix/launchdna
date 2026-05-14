@@ -50,7 +50,7 @@ export function dedupeListings(listings: NewListingFeedItem[]) {
   return deduped;
 }
 
-export function isReadableTokenText(text?: string) {
+export function isReadableTokenText(text?: string): text is string {
   if (!text) {
     return false;
   }
@@ -77,6 +77,7 @@ function deriveSymbolFromName(name: string) {
 }
 
 export function sanitizeTokenName(name?: string, symbol?: string, _address?: string) {
+  void _address;
   const safeName = isReadableTokenText(name) ? name.trim() : undefined;
   if (safeName) {
     return safeName;
@@ -91,6 +92,7 @@ export function sanitizeTokenName(name?: string, symbol?: string, _address?: str
 }
 
 export function sanitizeTokenSymbol(symbol?: string, name?: string, _address?: string) {
+  void _address;
   const safeSymbol = isReadableTokenText(symbol) ? symbol.trim() : undefined;
   if (safeSymbol) {
     return safeSymbol;
