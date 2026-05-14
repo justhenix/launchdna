@@ -65,6 +65,22 @@ function firstString(record: unknown, keys: string[]) {
   return typeof value === "string" && value.trim() !== "" ? value : undefined;
 }
 
+function firstStringOrList(record: unknown, keys: string[]) {
+  const value = field(record, keys);
+  if (typeof value === "string" && value.trim() !== "") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    const labels = value
+      .filter((item): item is string => typeof item === "string" && item.trim() !== "")
+      .map((item) => item.trim());
+    return labels.length > 0 ? labels.join(", ") : undefined;
+  }
+
+  return undefined;
+}
+
 function toBool(value: unknown) {
   if (typeof value === "boolean") {
     return value;
@@ -218,17 +234,57 @@ function normalizeHolders(holders: unknown, security: unknown): LaunchCase["hold
       "percent",
       "share",
       "uiAmountPercent",
+      "ui_amount_percent",
       "amountPercent",
+      "amount_percent",
+      "amountPercentage",
+      "amount_percentage",
+      "supplyPercent",
+      "supply_percent",
+      "percentOfSupply",
+      "percent_of_supply",
     ]);
     const fallbackPercent = rows.length > 0 && top10FromSecurity > 0 ? top10FromSecurity / rows.length : 0;
-    const tag = firstString(row, ["tag", "label", "nameTag", "ownerName", "type"]);
+    const tag = firstStringOrList(row, ["tag", "label", "labels", "tags", "nameTag", "ownerName", "type"]);
 
     return {
-      address: firstString(row, ["owner", "address", "wallet", "holder", "ownerAddress"]) ?? `Holder ${index + 1}`,
+      address: firstString(row, [
+        "owner",
+        "address",
+        "wallet",
+        "holder",
+        "ownerAddress",
+        "owner_address",
+        "holderAddress",
+        "holder_address",
+      ]) ?? `Holder ${index + 1}`,
       percentage: round(asPercent(explicitPercent, fallbackPercent), 2),
       ...(tag ? { tag } : {}),
     };
   });
+}
+
+function mergeHolderEvidence(
+  holders: LaunchCase["holders"],
+  taggedHolders: LaunchCase["holders"],
+): LaunchCase["holders"] {
+  const merged = holders.map((holder) => ({ ...holder }));
+
+  for (const tagged of taggedHolders) {
+    const existing = merged.find((holder) => holder.address === tagged.address);
+    if (existing) {
+      if (!existing.tag && tagged.tag) {
+        existing.tag = tagged.tag;
+      }
+      continue;
+    }
+
+    if (tagged.tag) {
+      merged.push(tagged);
+    }
+  }
+
+  return merged.slice(0, 10);
 }
 
 function securityFlagCount(security: unknown) {
@@ -400,8 +456,11 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   const overview = isRecord(input.overview) ? input.overview : {};
   const security = isRecord(input.security) ? input.security : {};
   const chart = normalizeChart(input.ohlcv);
-  const holderSource = extractArray(input.holders).length > 0 ? input.holders : input.holderPositions;
-  const holders = normalizeHolders(holderSource, security);
+  const normalizedHolders = normalizeHolders(input.holders, security);
+  const taggedHolders = normalizeHolders(input.holderPositions, security);
+  const holders = normalizedHolders.length > 0
+    ? mergeHolderEvidence(normalizedHolders, taggedHolders)
+    : taggedHolders;
   const trades = normalizeTrades(input.txs);
   const tradeMetrics = tradeStats(trades);
   const priceMetrics = chartStats(chart);

@@ -1,13 +1,88 @@
 "use client";
 
-// import { use } from "react";
-import { MOCK_LAUNCH_CASE } from "@/lib/mock/launch-case";
-import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity } from "lucide-react";
+import { use, useEffect, useState } from "react";
+import { LaunchCase } from "@/types/launch-case";
+import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import Link from "next/link";
 
-export default function CaseFilePage() {
-  // const resolvedParams = use(params);
-  const data = MOCK_LAUNCH_CASE;
+export default function CaseFilePage({ params }: { params: Promise<{ address: string }> }) {
+  const resolvedParams = use(params);
+  const address = resolvedParams.address;
+  
+  const [data, setData] = useState<LaunchCase | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address }),
+        });
+        
+        if (!res.ok) throw new Error("Failed to fetch case data");
+        
+        const result = await res.json();
+        setData(result);
+      } catch (err) {
+        console.error(err);
+        setError("Unable to retrieve forensic data. The token may be too new or the address is invalid.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [address]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div className="relative">
+          <Loader2 className="w-16 h-16 text-ldna-accent animate-spin" />
+          <div className="absolute inset-0 blur-xl bg-ldna-accent/20 animate-pulse" />
+        </div>
+        <div className="text-center">
+          <h2 className="text-2xl font-serif mb-2">Analyzing Evidence...</h2>
+          <p className="text-ldna-muted font-mono text-sm uppercase tracking-widest animate-pulse">Scanning Birdeye Nodes // {address.slice(0, 8)}...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] container mx-auto px-4">
+        <div className="bg-ldna-panel border border-ldna-accent/30 p-12 max-w-xl text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-ldna-accent/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+          <ShieldAlert className="w-16 h-16 text-ldna-accent mx-auto mb-6" />
+          <h2 className="text-3xl font-serif mb-4 text-ldna-text">Analysis Failed</h2>
+          <p className="text-ldna-muted mb-8 leading-relaxed">
+            {error || "An unexpected error occurred while processing the forensic report."}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/analyze"
+              className="px-8 py-3 bg-ldna-accent text-ldna-bg font-bold uppercase tracking-wider hover:bg-ldna-text transition-colors"
+            >
+              Return to Lab
+            </Link>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-8 py-3 border border-ldna-grid text-ldna-text font-bold uppercase tracking-wider hover:bg-ldna-panel transition-colors flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" /> Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
@@ -23,6 +98,9 @@ export default function CaseFilePage() {
             <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse" />
             <span>{"// CASE FILE"}</span>
             <span className="text-ldna-muted">{data.token.address.slice(0,12)}...</span>
+            {data.dataMode === "mock" && (
+              <span className="text-[10px] border border-ldna-accent/30 px-1.5 py-0.5 bg-ldna-accent/5 text-ldna-accent ml-2">DEMO DATA</span>
+            )}
           </div>
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 flex items-center gap-4 tracking-tight">
             {data.token.name}

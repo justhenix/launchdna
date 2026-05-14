@@ -13,6 +13,8 @@ import {
 
 type JsonRecord = Record<string, unknown>;
 
+let lastBirdeyeRequestAt = 0;
+
 export type BirdeyeRequestResult<T = unknown> = EndpointCallResult & {
   ok: boolean;
   data?: T;
@@ -42,6 +44,21 @@ function readError(raw: unknown, fallback: string) {
   return typeof message === "string" ? message : fallback;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function paceBirdeyeRequests() {
+  const minIntervalMs = 1100;
+  const waitMs = Math.max(0, lastBirdeyeRequestAt + minIntervalMs - Date.now());
+
+  if (waitMs > 0) {
+    await sleep(waitMs);
+  }
+
+  lastBirdeyeRequestAt = Date.now();
+}
+
 export class BirdeyeClient {
   private readonly apiKey = process.env.BIRDEYE_API_KEY?.trim();
   private readonly timeoutMs = 10_000;
@@ -68,6 +85,8 @@ export class BirdeyeClient {
         error: "Missing BIRDEYE_API_KEY",
       };
     }
+
+    await paceBirdeyeRequests();
 
     const startedAt = Date.now();
     const controller = new AbortController();
@@ -218,6 +237,18 @@ export class BirdeyeClient {
   }
 
   getHolderPositions(address: string, limit = 20) {
-    return this.request(BIRDEYE_ENDPOINTS.holderPositions, { address, limit }, address);
+    return this.request(
+      BIRDEYE_ENDPOINTS.holderPositions,
+      {
+        token_address: address,
+        labels: "bundler,sniper,insider,dev",
+        sort_by: "amount",
+        order_type: "desc",
+        ui_amount_mode: "scaled",
+        include_zero_balance: false,
+        limit: Math.min(limit, 50),
+      },
+      address,
+    );
   }
 }

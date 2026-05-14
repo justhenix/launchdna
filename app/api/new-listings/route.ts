@@ -88,7 +88,8 @@ function toIsoTime(record: JsonRecord) {
 
   if (numeric !== undefined) {
     const ms = numeric > 1_000_000_000_000 ? numeric : numeric * 1000;
-    return new Date(ms).toISOString();
+    const date = new Date(ms);
+    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
   }
 
   return stringField(record, ["createdAt", "created_at", "listedAt", "listed_at"]);
@@ -131,24 +132,67 @@ function usd(value?: number) {
 function normalizeListings(data: unknown): NewListingFeedItem[] {
   return extractRows(data).slice(0, 12).map((row, index) => {
     const createdAt = toIsoTime(row);
-    const symbol = stringField(row, ["symbol", "tokenSymbol"]) ?? `TOKEN${index + 1}`;
+    const symbol = stringField(row, ["symbol", "tokenSymbol", "token_symbol"]) ?? `TOKEN${index + 1}`;
 
     return {
-      address: stringField(row, ["address", "tokenAddress", "mint"]) ?? `mock-token-${index + 1}`,
-      name: stringField(row, ["name", "tokenName"]) ?? symbol,
+      address: stringField(row, [
+        "address",
+        "tokenAddress",
+        "token_address",
+        "mint",
+        "mintAddress",
+        "mint_address",
+        "tokenMint",
+        "token_mint",
+      ]) ?? `mock-token-${index + 1}`,
+      name: stringField(row, ["name", "tokenName", "token_name"]) ?? symbol,
       symbol,
       createdAt,
       age: ageFromIso(createdAt),
-      volume: usd(numberField(row, ["v24hUSD", "volume24hUsd", "volume24h", "liquidity"])),
+      volume: usd(numberField(row, [
+        "v24hUSD",
+        "v24h_usd",
+        "volume24hUsd",
+        "volume_24h_usd",
+        "volumeUsd",
+        "volume_usd",
+        "volume24h",
+        "liquidity",
+        "liquidityUsd",
+        "liquidity_usd",
+      ])),
       archetype: "Evaluating...",
     };
   });
 }
 
 export async function GET() {
-  const client = new BirdeyeClient();
+  try {
+    const client = new BirdeyeClient();
 
-  if (!client.hasApiKey()) {
+    if (!client.hasApiKey()) {
+      const response: NewListingsResponse = {
+        tokens: MOCK_TOKENS,
+        endpointProof: fallbackEndpointProof([BIRDEYE_ENDPOINTS.newListings]),
+        generatedAt: new Date().toISOString(),
+        dataMode: "mock",
+      };
+
+      return NextResponse.json(response);
+    }
+
+    const result = await client.getNewListings(12);
+    const endpointProof = buildEndpointProof([result], [BIRDEYE_ENDPOINTS.newListings]);
+    const tokens = result.ok ? normalizeListings(result.data) : [];
+    const response: NewListingsResponse = {
+      tokens: tokens.length > 0 ? tokens : MOCK_TOKENS,
+      endpointProof,
+      generatedAt: new Date().toISOString(),
+      dataMode: result.ok && tokens.length > 0 ? "live" : "mock",
+    };
+
+    return NextResponse.json(response);
+  } catch {
     const response: NewListingsResponse = {
       tokens: MOCK_TOKENS,
       endpointProof: fallbackEndpointProof([BIRDEYE_ENDPOINTS.newListings]),
@@ -158,16 +202,4 @@ export async function GET() {
 
     return NextResponse.json(response);
   }
-
-  const result = await client.getNewListings(12);
-  const endpointProof = buildEndpointProof([result], [BIRDEYE_ENDPOINTS.newListings]);
-  const tokens = result.ok ? normalizeListings(result.data) : [];
-  const response: NewListingsResponse = {
-    tokens: tokens.length > 0 ? tokens : MOCK_TOKENS,
-    endpointProof,
-    generatedAt: new Date().toISOString(),
-    dataMode: result.ok && tokens.length > 0 ? "live" : "mock",
-  };
-
-  return NextResponse.json(response);
 }
