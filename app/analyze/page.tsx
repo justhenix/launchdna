@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Search, Activity, Clock, Loader2 } from "lucide-react";
 import type { NewListingFeedItem } from "@/types/launch-case";
 import { dedupeListings, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
+
+type RowStatus = "idle" | "analyzing" | "ready" | "partial";
 
 export default function AnalyzePage() {
   const router = useRouter();
@@ -39,6 +40,26 @@ export default function AnalyzePage() {
 
   const [liveFeed, setLiveFeed] = useState<NewListingFeedItem[]>([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
+  const [rowStatus, setRowStatus] = useState<Record<string, RowStatus>>({});
+  const [logoReady, setLogoReady] = useState<Record<string, boolean>>({});
+
+  const buildCaseUrl = (token: NewListingFeedItem) => (
+    `/case/${encodeURIComponent(token.address)}?name=${encodeURIComponent(token.name ?? "")}&symbol=${encodeURIComponent(token.symbol ?? "")}`
+  );
+
+  const getStatus = (address: string) => rowStatus[address] ?? "idle";
+
+  const setStatus = (address: string, status: RowStatus) => {
+    setRowStatus((prev) => ({ ...prev, [address]: status }));
+  };
+
+  const handleLogoLoad = (address: string) => {
+    setLogoReady((prev) => ({ ...prev, [address]: true }));
+  };
+
+  const handleLogoError = (address: string) => {
+    setLogoReady((prev) => ({ ...prev, [address]: false }));
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -63,6 +84,9 @@ export default function AnalyzePage() {
           }
         }
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
         console.error("Failed to fetch feed:", err);
       } finally {
         if (isActive) {
@@ -77,6 +101,43 @@ export default function AnalyzePage() {
       controller.abort();
     };
   }, []);
+
+  const handleRowAction = async (token: NewListingFeedItem) => {
+    const status = getStatus(token.address);
+    if (status === "analyzing") {
+      return;
+    }
+
+    if (status === "ready" || status === "partial") {
+      router.push(buildCaseUrl(token));
+      return;
+    }
+
+    setStatus(token.address, "analyzing");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 16_000);
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: token.address, name: token.name, symbol: token.symbol }),
+        signal: controller.signal,
+      });
+      const result = await res.json().catch(() => undefined);
+      const mode = result?.dataMode;
+
+      setStatus(token.address, mode === "partial" ? "partial" : res.ok ? "ready" : "partial");
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+      console.error(err);
+      setStatus(token.address, "partial");
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-5xl relative">
@@ -149,43 +210,71 @@ export default function AnalyzePage() {
               <div key={i} className="h-24 bg-ldna-panel/20 border border-ldna-grid animate-pulse" />
             ))
           ) : liveFeed.length > 0 ? (
-            liveFeed.map((token, i) => (
-              <Link 
-                href={`/case/${encodeURIComponent(token.address)}?name=${encodeURIComponent(token.name ?? "")}&symbol=${encodeURIComponent(token.symbol ?? "")}`} 
-                key={i}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-ldna-panel/40 border border-ldna-grid hover:border-ldna-accent/50 hover:bg-ldna-panel/80 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-6 mb-4 sm:mb-0">
-                  <div className="w-12 h-12 bg-ldna-bg border border-ldna-grid flex items-center justify-center font-mono font-bold group-hover:border-ldna-accent/30 group-hover:text-ldna-accent transition-colors relative overflow-hidden text-sm">
-                    <div className="absolute inset-0 bg-ldna-accent/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300" />
-                    <span className="relative z-10">{token.symbol.slice(0,3)}</span>
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg mb-1">{token.symbol}</div>
-                    <div className="flex items-center gap-4 text-xs font-mono text-ldna-muted">
-                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {token.age ?? "new"}</span>
-                      <span className="text-ldna-text/70">Vol: {token.volume}</span>
+            liveFeed.map((token) => {
+              const status = getStatus(token.address);
+              const statusLabel = status === "analyzing"
+                ? "Analyzing..."
+                : status === "ready"
+                  ? "Open Case"
+                  : status === "partial"
+                    ? "Partial"
+                    : token.archetype;
+              const showLogo = Boolean(token.logoURI);
+              const logoLoaded = logoReady[token.address];
+
+              return (
+                <div 
+                  key={token.address}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-ldna-panel/40 border border-ldna-grid hover:border-ldna-accent/50 hover:bg-ldna-panel/80 transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-6 mb-4 sm:mb-0">
+                    <div className="w-12 h-12 bg-ldna-bg border border-ldna-grid flex items-center justify-center font-mono font-bold group-hover:border-ldna-accent/30 group-hover:text-ldna-accent transition-colors relative overflow-hidden text-sm">
+                      <div className="absolute inset-0 bg-ldna-accent/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300" />
+                      {showLogo && (
+                        <img
+                          src={token.logoURI}
+                          alt={`${token.symbol} logo`}
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${logoLoaded ? "opacity-100" : "opacity-0"}`}
+                          onLoad={() => handleLogoLoad(token.address)}
+                          onError={() => handleLogoError(token.address)}
+                        />
+                      )}
+                      <span className={`relative z-10 ${showLogo && logoLoaded ? "opacity-0" : "opacity-100"}`}>{token.symbol.slice(0,3)}</span>
+                    </div>
+                    <div>
+                      <div className="font-bold text-lg mb-1">{token.symbol}</div>
+                      <div className="flex items-center gap-4 text-xs font-mono text-ldna-muted">
+                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {token.age ?? "new"}</span>
+                        <span className="text-ldna-text/70">Vol: {token.volume}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4 justify-between sm:justify-end border-t sm:border-t-0 border-ldna-grid pt-4 sm:pt-0">
-                  <div className="text-xs font-mono text-ldna-muted hidden md:block">
-                    {token.address.slice(0, 8)}...{token.address.slice(-8)}
-                  </div>
-                  <div className={`text-xs font-mono font-bold px-3 py-1.5 border ${
-                    token.isDanger ? "bg-ldna-accent/10 border-ldna-accent/30 text-ldna-accent shadow-[0_0_10px_rgba(255,87,26,0.15)]" : 
-                    token.isSafe ? "bg-green-500/10 border-green-500/30 text-green-500" : 
-                    "bg-ldna-bg border-ldna-grid text-ldna-muted"
-                  }`}>
-                    {token.archetype}
-                  </div>
-                  <div className="text-ldna-muted group-hover:text-ldna-accent transition-colors p-2 bg-ldna-bg border border-ldna-grid group-hover:border-ldna-accent/30">
-                    <Search className="w-4 h-4" />
+                  <div className="flex items-center gap-4 justify-between sm:justify-end border-t sm:border-t-0 border-ldna-grid pt-4 sm:pt-0">
+                    <div className="text-xs font-mono text-ldna-muted hidden md:block">
+                      {token.address.slice(0, 8)}...{token.address.slice(-8)}
+                    </div>
+                    <div className={`text-xs font-mono font-bold px-3 py-1.5 border ${
+                      token.isDanger ? "bg-ldna-accent/10 border-ldna-accent/30 text-ldna-accent shadow-[0_0_10px_rgba(255,87,26,0.15)]" : 
+                      token.isSafe ? "bg-green-500/10 border-green-500/30 text-green-500" : 
+                      status === "partial" ? "bg-ldna-warning/10 border-ldna-warning/30 text-ldna-warning" :
+                      "bg-ldna-bg border-ldna-grid text-ldna-muted"
+                    }`}>
+                      {statusLabel}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRowAction(token)}
+                      disabled={status === "analyzing"}
+                      aria-label={status === "ready" ? "Open case" : status === "partial" ? "Open partial case" : "Analyze"}
+                      className="text-ldna-muted group-hover:text-ldna-accent transition-colors p-2 bg-ldna-bg border border-ldna-grid group-hover:border-ldna-accent/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-              </Link>
-            ))
+              );
+            })
           ) : (
             <div className="text-center py-20 border border-ldna-grid bg-ldna-panel/20 text-ldna-muted font-mono">
               NO RECENT LISTINGS DETECTED

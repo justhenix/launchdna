@@ -10,6 +10,7 @@ export const runtime = "nodejs";
 
 const MOCK_ADDRESS = "Mock11111111111111111111111111111111111111";
 const FIRST_HOUR_LOOKBACK_SECONDS = 7 * 24 * 60 * 60;
+const SERVER_TIMEOUT_MS = 18_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -124,48 +125,93 @@ export async function POST(request: Request) {
     }
 
     const results: BirdeyeRequestResult[] = [];
+    const deadline = Date.now() + SERVER_TIMEOUT_MS;
+    const timedOut = () => Date.now() > deadline;
 
-    const overview = await client.getTokenOverview(address);
-    results.push(overview);
+    const run = async (fn: () => Promise<BirdeyeRequestResult>) => {
+      if (timedOut()) {
+        return undefined;
+      }
 
-    const security = await client.getTokenSecurity(address);
-    results.push(security);
+      const result = await fn();
+      results.push(result);
+      return result;
+    };
 
-    const window = ohlcvWindow(overview.data, security.data);
-    const ohlcv = await client.getOhlcv(address, window.from, window.to);
-    results.push(ohlcv);
+    const overview = await run(() => client.getTokenOverview(address));
 
-    const txs = await client.getTokenTxs(address);
-    results.push(txs);
+    const security = await run(() => client.getTokenSecurity(address));
 
-    const holders = await client.getTokenHolders(address);
-    results.push(holders);
+    const window = ohlcvWindow(overview?.data, security?.data);
+    const ohlcv = await run(() => client.getOhlcv(address, window.from, window.to));
 
-    const holderPositions = await client.getHolderPositions(address);
-    results.push(holderPositions);
+    const txs = await run(() => client.getTokenTxs(address));
+
+    const holders = await run(() => client.getTokenHolders(address));
+
+    const holderPositions = await run(() => client.getHolderPositions(address));
 
     const endpointProof = buildEndpointProof(results, BIRDEYE_CASE_ENDPOINTS);
     const liveCount = results.filter((result) => result.ok).length;
 
+    if (timedOut()) {
+      return NextResponse.json(classifyLaunch({
+        address,
+        name,
+        symbol,
+        overview: overview?.data,
+        security: security?.data,
+        ohlcv: ohlcv?.data,
+        txs: txs?.data,
+        holders: holders?.data,
+        holderPositions: holderPositions?.data,
+        endpointProof,
+        dataMode: "partial",
+      }));
+    }
+
     if (liveCount === 0) {
-      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
+      return NextResponse.json(classifyLaunch({
+        address,
+        name,
+        symbol,
+        overview: overview?.data,
+        security: security?.data,
+        ohlcv: ohlcv?.data,
+        txs: txs?.data,
+        holders: holders?.data,
+        holderPositions: holderPositions?.data,
+        endpointProof,
+        dataMode: "partial",
+      }));
     }
 
     return NextResponse.json(classifyLaunch({
       address,
       name,
       symbol,
-      overview: overview.data,
-      security: security.data,
-      ohlcv: ohlcv.data,
-      txs: txs.data,
-      holders: holders.data,
-      holderPositions: holderPositions.data,
+      overview: overview?.data,
+      security: security?.data,
+      ohlcv: ohlcv?.data,
+      txs: txs?.data,
+      holders: holders?.data,
+      holderPositions: holderPositions?.data,
       endpointProof,
       dataMode: liveCount === results.length ? "live" : "partial",
     }));
   } catch {
+    if (address === "mock-token" || !isLikelySolanaAddress(address)) {
+      const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
+      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
+    }
+
     const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-    return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
+    return NextResponse.json(classifyLaunch({
+      address,
+      name,
+      symbol,
+      endpointProof,
+      dataMode: "partial",
+    }));
   }
 }

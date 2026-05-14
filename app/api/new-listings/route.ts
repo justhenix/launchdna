@@ -61,6 +61,22 @@ function stringField(record: JsonRecord, keys: string[]) {
   return undefined;
 }
 
+function nestedStringField(record: JsonRecord, parentKeys: string[], keys: string[]) {
+  for (const parentKey of parentKeys) {
+    const nested = record[parentKey];
+    if (!isRecord(nested)) {
+      continue;
+    }
+
+    const value = stringField(nested, keys);
+    if (value) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
 function numberField(record: JsonRecord, keys: string[]) {
   for (const key of keys) {
     const value = record[key];
@@ -152,6 +168,8 @@ function normalizeListings(data: unknown): NewListingFeedItem[] {
     }
 
     const createdAt = toIsoTime(row);
+    const logoURI = stringField(row, ["logoURI", "logoUri", "logo", "icon", "image"])
+      ?? nestedStringField(row, ["extensions", "tokenExtensions"], ["logoURI", "logoUri", "logo", "icon", "image"]);
     const safeSymbol = symbol ?? name ?? "";
     const safeName = name ?? symbol ?? safeSymbol;
 
@@ -178,6 +196,7 @@ function normalizeListings(data: unknown): NewListingFeedItem[] {
         "liquidity_usd",
       ])),
       archetype: "Evaluating...",
+      ...(logoURI ? { logoURI } : {}),
     }];
   });
 }

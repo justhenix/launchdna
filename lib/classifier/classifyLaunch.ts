@@ -634,7 +634,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     hasOhlcvData: chartResult.hasOhlcvData,
   };
   const dataQuality = [quality.hasHolderData, quality.hasTradeData, quality.hasOhlcvData].filter(Boolean).length;
-  const confidenceCap = dataQuality === 3 ? 95 : dataQuality === 2 ? 89 : dataQuality === 1 ? 76 : 65;
+  const confidenceCap = dataQuality === 3 ? 95 : 65;
   const confidence = clamp(Math.max(scores.sniperSwarm, scores.liquidityMirage, scores.organicGrind), 55, confidenceCap);
   const securityFlagsDetected = flaggedHolderCount > 0 ? "Detected" : "None";
   const holderEvidenceText = hasHolderData

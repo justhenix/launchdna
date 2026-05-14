@@ -2,12 +2,100 @@
 
 import { use, useEffect, useState } from "react";
 import { LaunchCase } from "@/types/launch-case";
+import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
+import { fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
+import { sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-const ANALYZE_TIMEOUT_MS = 25_000;
+const ANALYZE_TIMEOUT_MS = 20_000;
+
+function neutralChart(): LaunchCase["chart"] {
+  return Array.from({ length: 60 }).map((_, index) => ({
+    time: `Minute ${index + 1}`,
+    price: 1,
+    volume: 0,
+  }));
+}
+
+function createPartialFallbackCase(
+  address: string,
+  name?: string,
+  symbol?: string,
+  endpointProof: LaunchCase["endpointProof"] = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS),
+): LaunchCase {
+  const safeName = sanitizeTokenName(name, symbol, address);
+  const safeSymbol = sanitizeTokenSymbol(symbol, name, address);
+
+  return {
+    token: {
+      address,
+      name: safeName,
+      symbol: safeSymbol,
+      chain: "solana",
+    },
+    classification: {
+      archetype: "Organic Grind",
+      confidence: 60,
+      summary: "Partial evidence available. Token may be too new for complete Birdeye history.",
+    },
+    evidence: [
+      {
+        label: "Early Buy Compression",
+        value: "Insufficient",
+        severity: "neutral",
+        explanation: "Insufficient sample; proxy unavailable until more swaps settle.",
+      },
+      {
+        label: "Top 10 Holder Concentration",
+        value: "Insufficient",
+        severity: "neutral",
+        explanation: "Holder rows not yet indexed; proxy not available.",
+      },
+      {
+        label: "Trade Pressure",
+        value: "INSUFFICIENT",
+        severity: "neutral",
+        explanation: "Insufficient sample; trade pressure neutral until history grows.",
+      },
+    ],
+    metrics: {
+      earlyBuyCompression: 0,
+      top10HolderConcentration: 0,
+      buySellRatio: 0,
+      priceChange1h: 0,
+      sellPressure: 0,
+      liquidityShock: 0,
+      totalTrades: 0,
+      totalHolders: 0,
+    },
+    scores: {
+      sniperSwarm: 20,
+      liquidityMirage: 20,
+      organicGrind: 60,
+    },
+    chart: neutralChart(),
+    timeline: [
+      {
+        time: "0m",
+        label: "Partial Evidence",
+        detail: "Token too new; Birdeye history still indexing.",
+        severity: "neutral",
+      },
+    ],
+    holders: [],
+    trades: {
+      buys: 0,
+      sells: 0,
+      netPressure: "balanced",
+    },
+    endpointProof,
+    generatedAt: new Date().toISOString(),
+    dataMode: "partial",
+  };
+}
 
 export default function CaseFilePage({ params }: { params: Promise<{ address: string }> }) {
   const resolvedParams = use(params);
@@ -47,9 +135,8 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           return;
         }
         console.error(err);
-        setError(err instanceof DOMException && err.name === "AbortError"
-          ? "Analysis timed out. Birdeye data may be sparse for this token; retry or use another listing."
-          : "Unable to retrieve forensic data. The token may be too new or the address is invalid.");
+        const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
+        setData(createPartialFallbackCase(address, tokenName, tokenSymbol, endpointProof));
       } finally {
         if (isActive) {
           window.clearTimeout(timeout);
@@ -82,7 +169,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
     );
   }
 
-  if (error || !data) {
+  if (error && !data) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] container mx-auto px-4">
         <div className="bg-ldna-panel border border-ldna-accent/30 p-12 max-w-xl text-center relative overflow-hidden">
@@ -118,6 +205,12 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
     <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
       <div className="fixed inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay -z-10" />
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
+
+      {data.dataMode === "partial" && (
+        <div className="mb-8 border border-ldna-warning/30 bg-ldna-panel/60 px-6 py-4 text-sm font-mono text-ldna-warning">
+          Partial evidence available. Token may be too new for complete Birdeye history.
+        </div>
+      )}
 
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-8 border-b border-ldna-grid relative">
@@ -255,15 +348,19 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             </h2>
             <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
               <div className="space-y-4">
-                {data.holders.map((holder, i) => (
-                  <div key={i} className="flex items-center justify-between group">
-                    <div className="flex flex-col">
-                      <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
-                      {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
+                {data.holders.length === 0 ? (
+                  <div className="text-xs font-mono text-ldna-muted">Insufficient holder data yet. Birdeye indexing in progress.</div>
+                ) : (
+                  data.holders.map((holder, i) => (
+                    <div key={i} className="flex items-center justify-between group">
+                      <div className="flex flex-col">
+                        <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
+                        {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
+                      </div>
+                      <div className="font-mono font-bold text-ldna-text">{Math.min(100, Math.max(0, holder.percentage))}%</div>
                     </div>
-                    <div className="font-mono font-bold text-ldna-text">{Math.min(100, Math.max(0, holder.percentage))}%</div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </section>

@@ -96,6 +96,7 @@ export type NewListingFeedItem = {
   archetype?: LaunchArchetype | "Evaluating...";
   isDanger?: boolean;
   isSafe?: boolean;
+  logoURI?: string;
 };
 
 export type NewListingsResponse = {
