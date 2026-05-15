@@ -9,6 +9,7 @@ import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, C
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { TooltipLabel } from "@/components/InfoTooltip";
 
 const ANALYZE_TIMEOUT_MS = 20_000;
 
@@ -214,8 +215,13 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
 
       {data.dataMode === "partial" && (
-        <div className="mb-8 border border-ldna-warning/30 bg-ldna-panel/60 px-6 py-4 text-sm font-mono text-ldna-warning">
-          Partial evidence available. This token may be too new for complete Birdeye history.
+        <div className="mb-8 border border-ldna-warning/30 bg-ldna-panel/60 px-6 py-4">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-ldna-warning uppercase tracking-widest">
+            <TooltipLabel label="Partial Evidence" align="start" />
+          </div>
+          <div className="mt-2 text-sm font-mono text-ldna-warning/80">
+            Some Birdeye endpoints returned incomplete data, usually because the token is very new.
+          </div>
         </div>
       )}
 
@@ -229,7 +235,11 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <span>{"// CASE FILE"}</span>
             <span className="text-ldna-muted">{data.token.address.slice(0,12)}...</span>
             {data.dataMode === "mock" && (
-              <span className="text-[10px] border border-ldna-accent/30 px-1.5 py-0.5 bg-ldna-accent/5 text-ldna-accent ml-2">DEMO DATA</span>
+              <TooltipLabel
+                label="Birdeye Snapshot"
+                className="text-[10px] border border-ldna-accent/30 px-1.5 py-0.5 bg-ldna-accent/5 text-ldna-accent ml-2 uppercase tracking-widest"
+                align="end"
+              />
             )}
           </div>
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 flex items-center gap-4 tracking-tight">
@@ -242,11 +252,21 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           <div className="inline-flex items-center gap-3 px-4 py-2 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative overflow-hidden group">
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             <ShieldAlert className="w-5 h-5 text-ldna-accent" />
-            <span className="font-mono font-bold text-lg text-ldna-accent uppercase tracking-wider">{data.classification.archetype}</span>
+            <TooltipLabel
+              label={data.classification.archetype}
+              className="font-mono font-bold text-lg text-ldna-accent uppercase tracking-wider"
+              align="end"
+            />
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-3">{data.classification.confidence}% CONF</span>
           </div>
         </div>
       </div>
+
+      {data.dataMode === "mock" && (
+        <div className="mb-8 -mt-4 text-xs font-mono text-ldna-muted">
+          Captured from Birdeye data for stable judging and demo playback.
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-8">
         
@@ -269,7 +289,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
               <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay</span>
-              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE OHLCV</span>
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20 flex items-center gap-1.5">
+                SOURCE: BIRDEYE
+                <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="end" />
+              </span>
             </h2>
             <div className="bg-ldna-panel/60 border border-ldna-grid p-6 h-96 relative group">
               {/* Scanline effect */}
@@ -306,7 +329,11 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
               {data.evidence.map((ev, i) => (
                 <div key={i} className="bg-ldna-panel/80 border border-ldna-grid p-6 hover:border-ldna-accent/30 transition-colors">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="text-xs font-mono font-bold uppercase tracking-wider text-ldna-text/80">{ev.label}</div>
+                    <TooltipLabel
+                      label={ev.label}
+                      className="text-xs font-mono font-bold uppercase tracking-wider text-ldna-text/80"
+                      align="start"
+                    />
                     {ev.severity === 'danger' && <AlertTriangle className="w-4 h-4 text-ldna-accent animate-pulse" />}
                     {ev.severity === 'warning' && <AlertTriangle className="w-4 h-4 text-ldna-warning" />}
                     {ev.severity === 'good' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
@@ -334,7 +361,11 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                       event.severity === 'warning' ? 'bg-ldna-warning' : 'bg-ldna-muted'
                     }`} />
                     <div className="text-xs font-mono text-ldna-muted mb-1.5 group-hover:text-ldna-text transition-colors">{event.time}</div>
-                    <div className="font-bold text-ldna-text mb-1.5 text-lg">{event.label}</div>
+                    <TooltipLabel
+                      label={event.label}
+                      className="font-bold text-ldna-text mb-1.5 text-lg"
+                      align="start"
+                    />
                     <div className="text-sm text-ldna-muted/80">{event.detail}</div>
                   </div>
                 ))}
@@ -351,7 +382,14 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
               <span className="flex items-center gap-2"><Users className="w-4 h-4" /> 05 / Top Holders</span>
-              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+              <span className="flex items-center gap-2">
+                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+                <TooltipLabel
+                  label="Holder Concentration"
+                  className="text-[10px] bg-ldna-panel border border-ldna-grid px-1.5 py-0.5 text-ldna-muted uppercase tracking-widest"
+                  align="end"
+                />
+              </span>
             </h2>
             <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
               <div className="space-y-4">
@@ -375,7 +413,13 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           {/* Section 06: Trade Pressure */}
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
-              <span className="flex items-center gap-2"><Activity className="w-4 h-4" /> 06 / Trade Pressure</span>
+              <span className="flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                <span className="inline-flex items-center gap-2">
+                  06 /
+                  <TooltipLabel label="Trade Pressure" align="start" />
+                </span>
+              </span>
               <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
             </h2>
             <div className="bg-ldna-panel/80 border border-ldna-grid p-6">

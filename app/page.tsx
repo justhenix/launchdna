@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2 } from "lucide-react";
+import { TooltipLabel } from "@/components/InfoTooltip";
 
 export default function Home() {
   return (
@@ -36,8 +37,8 @@ export default function Home() {
               <Link href="/analyze" className="w-full sm:w-auto px-8 py-4 bg-ldna-accent text-ldna-bg font-bold uppercase tracking-wider hover:bg-ldna-text hover:shadow-[0_0_20px_rgba(255,87,26,0.4)] transition-all duration-300 flex items-center justify-center gap-2 group">
                 Analyze Token <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link href="/case/7jQq...44b" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
-                View Case Files <ShieldAlert className="w-5 h-5" />
+              <Link href="/case/mock-token" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
+                View Snapshot Case <ShieldAlert className="w-5 h-5" />
               </Link>
             </div>
           </div>
@@ -115,30 +116,32 @@ export default function Home() {
       <section className="py-24 border-b border-ldna-grid bg-[radial-gradient(ellipse_at_bottom,var(--tw-gradient-stops))] from-ldna-panel/80 to-ldna-bg">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
-            <h2 className="text-3xl font-serif">Case File Preview</h2>
-            <Link href="/case/7jQq...44b" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
-              Open Full Report <ArrowRight className="w-4 h-4" />
+            <h2 className="text-3xl font-serif">Birdeye Snapshot Case</h2>
+            <Link href="/case/mock-token" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
+              Open Snapshot Report <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           
           <div className="border border-ldna-grid bg-ldna-bg/80 backdrop-blur-sm p-8 md:p-10 relative group cursor-pointer hover:border-ldna-accent/40 hover:shadow-[0_0_30px_rgba(255,87,26,0.05)] transition-all duration-500">
             <div className="absolute top-0 right-0 p-3 border-b border-l border-ldna-grid font-mono text-xs text-ldna-muted group-hover:bg-ldna-panel group-hover:text-ldna-accent transition-colors flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full animate-pulse" />
-              CLASSIFIED // LDNA-842
+              <TooltipLabel label="Birdeye Snapshot" className="text-ldna-accent uppercase tracking-widest" align="end" />
+              <span className="text-ldna-muted">{"// LDNA-842"}</span>
             </div>
             
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start mb-10 mt-2">
               <div className="w-20 h-20 bg-ldna-panel border border-ldna-grid flex items-center justify-center text-ldna-muted font-mono font-bold text-2xl shrink-0 group-hover:border-ldna-accent/50 transition-colors">
-                DOGE
+                SNAP
               </div>
               <div>
-                <h3 className="text-3xl font-bold mb-3 tracking-tight">DOGE2</h3>
+                <h3 className="text-3xl font-bold mb-3 tracking-tight">Birdeye Snapshot Case</h3>
                 <div className="flex flex-wrap gap-3">
-                  <span className="px-3 py-1.5 text-xs font-mono font-bold bg-ldna-accent/10 text-ldna-accent border border-ldna-accent/30">
-                    Sniper Swarm
-                  </span>
+                  <TooltipLabel
+                    label="Liquidity Mirage"
+                    className="px-3 py-1.5 text-xs font-mono font-bold bg-ldna-accent/10 text-ldna-accent border border-ldna-accent/30"
+                  />
                   <span className="px-3 py-1.5 text-xs font-mono bg-ldna-panel border border-ldna-grid text-ldna-text">
-                    Confidence: 84%
+                    Confidence: 76%
                   </span>
                 </div>
               </div>
@@ -146,19 +149,26 @@ export default function Home() {
 
             <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
               {[
-                { label: "Early Buy Compression", text: "61% of buys in first 3 mins", color: "text-ldna-warning", metric: "HIGH" },
-                { label: "Top 10 Concentration", text: "42% controlled by top wallets", color: "text-ldna-warning", metric: "42%" },
-                { label: "Sell Pressure", text: "Appeared after first spike", color: "text-ldna-accent", metric: "EVIDENT" },
-                { label: "Security Flags", text: "Suspicious contract logic", color: "text-ldna-accent", metric: "FLAGGED" },
+                { label: "Early Buy Compression", text: "22% of buys in first 3 mins", color: "text-ldna-muted", metric: "22%" },
+                { label: "Top 10 Holder Concentration", text: "27.4% held by top wallets", color: "text-ldna-muted", metric: "27%" },
+                { label: "Trade Pressure", text: "Sells outweighed buys in first hour", color: "text-ldna-accent", metric: "SELL" },
+                { label: "Liquidity Shock Proxy", text: "Volume spike with weak follow-through", color: "text-ldna-warning", metric: "58%" },
               ].map((evidence, i) => (
                 <div key={i} className="p-5 bg-ldna-panel/40 border border-ldna-grid/50 hover:bg-ldna-panel/80 transition-colors flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-2">
-                    <div className={`text-xs font-mono font-bold uppercase ${evidence.color}`}>{evidence.label}</div>
+                    <TooltipLabel
+                      label={evidence.label}
+                      className={`text-xs font-mono font-bold uppercase ${evidence.color}`}
+                      align="start"
+                    />
                     <div className="text-[10px] font-mono bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid">{evidence.metric}</div>
                   </div>
                   <div className="text-sm text-ldna-muted">{evidence.text}</div>
                 </div>
               ))}
+            </div>
+            <div className="mt-6 text-xs font-mono text-ldna-muted">
+              Captured from Birdeye data for stable judging and demo playback.
             </div>
           </div>
         </div>

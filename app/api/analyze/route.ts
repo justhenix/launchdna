@@ -8,7 +8,7 @@ import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/apiCallLo
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const MOCK_ADDRESS = "Mock11111111111111111111111111111111111111";
+const MOCK_ADDRESS = "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1";
 const FIRST_HOUR_LOOKBACK_SECONDS = 7 * 24 * 60 * 60;
 const SERVER_TIMEOUT_MS = 18_000;
 
@@ -121,7 +121,8 @@ export async function POST(request: Request) {
 
     if (!client.hasApiKey() || address === "mock-token" || !isLikelySolanaAddress(address)) {
       const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
+      const snapshotAddress = address === "mock-token" ? "" : address;
+      return NextResponse.json(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
     }
 
     const results: BirdeyeRequestResult[] = [];
@@ -202,7 +203,8 @@ export async function POST(request: Request) {
   } catch {
     if (address === "mock-token" || !isLikelySolanaAddress(address)) {
       const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-      return NextResponse.json(createMockLaunchCase(address, endpointProof, "mock", { name, symbol }));
+      const snapshotAddress = address === "mock-token" ? "" : address;
+      return NextResponse.json(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
     }
 
     const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);

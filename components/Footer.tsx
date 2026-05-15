@@ -30,7 +30,7 @@ export function Footer() {
                 <Link href="/analyze" className="hover:text-ldna-accent transition-colors">Analyzer</Link>
               </li>
               <li>
-                <Link href="/case/mock-token" className="hover:text-ldna-accent transition-colors">Sample Case File</Link>
+                <Link href="/case/mock-token" className="hover:text-ldna-accent transition-colors">Birdeye Snapshot Case</Link>
               </li>
               <li>
                 <Link href="/proof" className="hover:text-ldna-accent transition-colors">Architecture & Proof</Link>
@@ -44,7 +44,7 @@ export function Footer() {
               <li>Built for Birdeye BIP Sprint 4</li>
               <li>Superteam Earn Submission</li>
               <li>
-                <a href="#" className="hover:text-ldna-accent transition-colors">Live Demo</a>
+                <a href="#" className="hover:text-ldna-accent transition-colors">Live App</a>
               </li>
             </ul>
           </div>

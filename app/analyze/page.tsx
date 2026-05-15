@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Activity, Clock, Loader2 } from "lucide-react";
-import type { NewListingFeedItem } from "@/types/launch-case";
+import type { NewListingFeedItem, NewListingsResponse } from "@/types/launch-case";
 import { dedupeListings, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 
 export default function AnalyzePage() {
@@ -38,6 +38,7 @@ export default function AnalyzePage() {
 
   const [liveFeed, setLiveFeed] = useState<NewListingFeedItem[]>([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
+  const [feedMode, setFeedMode] = useState<NewListingsResponse["dataMode"]>("live");
 
   const buildCaseUrl = (token: NewListingFeedItem) => (
     `/case/${encodeURIComponent(token.address)}?name=${encodeURIComponent(token.name ?? "")}&symbol=${encodeURIComponent(token.symbol ?? "")}`
@@ -50,7 +51,7 @@ export default function AnalyzePage() {
       try {
         const res = await fetch("/api/new-listings", { signal: controller.signal });
         if (res.ok) {
-          const result = await res.json();
+          const result = (await res.json()) as NewListingsResponse;
           if (isActive) {
             const sanitized = dedupeListings((result.tokens ?? []).map((token: NewListingFeedItem) => {
               const name = sanitizeTokenName(token.name, token.symbol, token.address);
@@ -63,6 +64,7 @@ export default function AnalyzePage() {
               };
             }));
             setLiveFeed(sanitized);
+            setFeedMode(result.dataMode ?? "live");
           }
         }
       } catch (err) {
@@ -136,7 +138,7 @@ export default function AnalyzePage() {
         </div>
         <div className="mt-4 flex items-center gap-2 text-xs font-mono text-ldna-muted">
           <Activity className="w-3.5 h-3.5" />
-          <span>Only evaluating tokens launched within the last 24 hours. Demonstration mode active.</span>
+          <span>Only evaluating tokens launched within the last 24 hours.</span>
         </div>
       </form>
 
@@ -148,8 +150,8 @@ export default function AnalyzePage() {
             New Listings Feed
           </h2>
           <div className="flex items-center gap-2 text-xs font-mono text-ldna-text bg-ldna-panel px-3 py-1 border border-ldna-grid">
-            <div className={`w-2 h-2 rounded-full ${isLoadingFeed ? 'bg-ldna-muted' : 'bg-green-500 animate-[pulse_2s_ease-in-out_infinite]'}`} />
-            {isLoadingFeed ? 'SYNCING...' : 'LIVE // SYNCED'}
+            <div className={`w-2 h-2 rounded-full ${isLoadingFeed ? "bg-ldna-muted" : feedMode === "mock" ? "bg-ldna-warning" : "bg-green-500 animate-[pulse_2s_ease-in-out_infinite]"}`} />
+            {isLoadingFeed ? "SYNCING..." : feedMode === "mock" ? "BIRDEYE SNAPSHOT" : "LIVE // SYNCED"}
           </div>
         </div>
 
@@ -159,12 +161,8 @@ export default function AnalyzePage() {
               <div key={i} className="h-24 bg-ldna-panel/20 border border-ldna-grid animate-pulse" />
             ))
           ) : liveFeed.length > 0 ? (
-            liveFeed.map((token) => {
-              const status = "ready"; // Placeholder if real status logic missing
-              const statusLabel = "Open Case";
-
-              return (
-                <div 
+            liveFeed.map((token) => (
+                <div
                   key={token.address}
                   onClick={() => handleRowAction(token)}
                   role="button"
@@ -175,9 +173,7 @@ export default function AnalyzePage() {
                       handleRowAction(token);
                     }
                   }}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-ldna-panel/40 border border-ldna-grid transition-all duration-300 group cursor-pointer focus:outline-none focus:border-ldna-accent/50 hover:border-ldna-accent/50 hover:bg-ldna-panel/60 hover:translate-y-[-2px] hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${
-                    status === "analyzing" ? "pointer-events-none opacity-80" : ""
-                  }`}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-ldna-panel/40 border border-ldna-grid transition-all duration-300 group cursor-pointer focus:outline-none focus:border-ldna-accent/50 hover:border-ldna-accent/50 hover:bg-ldna-panel/60 hover:translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
                 >
                   <div className="flex items-center gap-6 mb-4 sm:mb-0">
                     <div className="w-12 h-12 bg-ldna-bg border border-ldna-grid flex items-center justify-center font-mono font-bold group-hover:border-ldna-accent/30 group-hover:text-ldna-accent transition-colors relative overflow-hidden text-sm">
@@ -197,27 +193,12 @@ export default function AnalyzePage() {
                     <div className="text-xs font-mono text-ldna-muted hidden md:block">
                       {token.address.slice(0, 8)}...{token.address.slice(-8)}
                     </div>
-                    <div className={`text-xs font-mono font-bold px-4 py-2 border transition-all ${
-                      status === "analyzing" ? "bg-ldna-panel border-ldna-grid text-ldna-muted animate-pulse" :
-                      status === "ready" ? "bg-ldna-accent text-ldna-bg border-ldna-accent shadow-[0_0_15px_rgba(255,87,26,0.3)]" :
-                      status === "partial" ? "bg-ldna-warning/20 border-ldna-warning/40 text-ldna-warning" :
-                      token.isDanger ? "bg-ldna-accent/10 border-ldna-accent/30 text-ldna-accent" : 
-                      token.isSafe ? "bg-green-500/10 border-green-500/30 text-green-500" : 
-                      "bg-ldna-bg border-ldna-grid text-ldna-muted group-hover:border-ldna-accent/50 group-hover:text-ldna-accent"
-                    }`}>
-                      {status === "analyzing" ? (
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          ANALYZING
-                        </span>
-                      ) : (
-                        "OPEN CASE"
-                      )}
+                    <div className="text-xs font-mono font-bold px-4 py-2 border transition-all bg-ldna-accent text-ldna-bg border-ldna-accent shadow-[0_0_15px_rgba(255,87,26,0.3)]">
+                      OPEN CASE
                     </div>
                   </div>
                 </div>
-              );
-            })
+            ))
           ) : (
             <div className="text-center py-20 border border-ldna-grid bg-ldna-panel/20 text-ldna-muted font-mono">
               NO RECENT LISTINGS DETECTED

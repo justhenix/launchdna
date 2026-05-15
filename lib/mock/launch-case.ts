@@ -4,106 +4,112 @@ export type { EvidenceSeverity, LaunchArchetype, LaunchCase } from "@/types/laun
 
 export const MOCK_LAUNCH_CASE: LaunchCase = {
   token: {
-    address: "Mock11111111111111111111111111111111111111",
-    name: "Mock Token",
-    symbol: "MOCK",
+    address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",
+    name: "Birdeye Snapshot Case",
+    symbol: "SNAP",
     chain: "solana",
   },
   classification: {
-    archetype: "Sniper Swarm",
-    confidence: 84,
-    summary: "High probability of coordinated sniper activity in the first 3 minutes, followed by heavy sell pressure leading to price collapse.",
+    archetype: "Liquidity Mirage",
+    confidence: 76,
+    summary: "Launch shows early volume lift with softer liquidity follow-through and moderate sell pressure in the first hour.",
   },
   evidence: [
     {
       label: "Early Buy Compression",
-      value: "61%",
-      severity: "danger",
-      explanation: "61% of all buys in the first hour happened within the first 3 minutes.",
+      value: "22%",
+      severity: "neutral",
+      explanation: "Early buy clustering is present but not extreme in the first few minutes.",
     },
     {
       label: "Top 10 Holder Concentration",
-      value: "42%",
-      severity: "warning",
-      explanation: "Top 10 wallets control 42% of circulating supply.",
+      value: "27.4%",
+      severity: "neutral",
+      explanation: "Top 10 holders control an estimated 27.4% of visible supply.",
     },
     {
-      label: "Sell Pressure",
-      value: "Extreme",
-      severity: "danger",
-      explanation: "Massive sell walls appeared immediately after the initial price spike.",
+      label: "Trade Pressure",
+      value: "SELL",
+      severity: "warning",
+      explanation: "Observed sells outweighed buys across the first-hour trade sample.",
+    },
+    {
+      label: "Liquidity Shock Proxy",
+      value: "58%",
+      severity: "warning",
+      explanation: "Proxy combines OHLCV movement, early volume, and sell pressure signals.",
     },
     {
       label: "Security Flags",
-      value: "Detected",
-      severity: "warning",
-      explanation: "Suspicious contract behavior and mutable metadata detected.",
+      value: "None",
+      severity: "good",
+      explanation: "No elevated risk indicators surfaced in the Birdeye security sample.",
     },
   ],
   metrics: {
-    earlyBuyCompression: 61,
-    top10HolderConcentration: 42,
-    buySellRatio: 0.35,
-    priceChange1h: -45.2,
-    sellPressure: 85,
-    liquidityShock: 72,
-    flaggedHolderCount: 14,
-    totalTrades: 3420,
-    totalHolders: 1105,
+    earlyBuyCompression: 22,
+    top10HolderConcentration: 27.4,
+    buySellRatio: 0.74,
+    priceChange1h: -12.8,
+    sellPressure: 57,
+    liquidityShock: 58,
+    flaggedHolderCount: 0,
+    totalTrades: 1840,
+    totalHolders: 620,
   },
   scores: {
-    sniperSwarm: 84,
-    liquidityMirage: 45,
-    organicGrind: 12,
+    sniperSwarm: 33,
+    liquidityMirage: 71,
+    organicGrind: 48,
   },
   chart: Array.from({ length: 60 }).map((_, i) => {
-    // Mocking an initial spike and then crash
-    let price = 0.01;
-    let volume = 5000;
-    if (i < 5) {
-      price = 0.01 + i * 0.05;
-      volume = 50000 + i * 10000;
-    } else if (i < 15) {
-      price = 0.26 - (i - 5) * 0.02;
-      volume = 100000 - (i - 5) * 5000;
+    const base = 0.012;
+    let price = base;
+    let volume = 12000;
+    if (i < 8) {
+      price = base + i * 0.002;
+      volume = 22000 + i * 5000;
+    } else if (i < 20) {
+      price = 0.028 - (i - 8) * 0.0009;
+      volume = 52000 - (i - 8) * 1200;
     } else {
-      price = 0.06 - (i - 15) * 0.001;
-      volume = 20000 - (i - 15) * 200;
+      price = 0.018 + Math.sin(i / 6) * 0.0006;
+      volume = 24000 + Math.cos(i / 5) * 800;
     }
     return {
       time: `Minute ${i + 1}`,
-      price: Math.max(price, 0.001),
-      volume: Math.max(volume, 1000),
+      price: Number(Math.max(price, 0.005).toFixed(4)),
+      volume: Math.round(Math.max(volume, 4000)),
     };
   }),
   timeline: [
-    { time: "0m", label: "Liquidity Added", detail: "Initial liquidity pool created.", severity: "neutral" },
-    { time: "1m", label: "Sniper Buys", detail: "24 coordinated wallets bought.", severity: "danger" },
-    { time: "3m", label: "Price Peak", detail: "Token reached ATH.", severity: "warning" },
-    { time: "5m", label: "Sell Off Begins", detail: "Snipers started dumping.", severity: "danger" },
-    { time: "15m", label: "Liquidity Shock", detail: "Significant liquidity withdrawn.", severity: "danger" },
-    { time: "60m", label: "Stagnation", detail: "Low volume sideways movement.", severity: "neutral" },
+    { time: "0m", label: "Listing Window", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
+    { time: "4m", label: "Early Volume Spike", detail: "Initial swap burst pushed volume above baseline.", severity: "warning" },
+    { time: "9m", label: "Price Crest", detail: "Price reached a local high before cooling.", severity: "neutral" },
+    { time: "22m", label: "Sell Pressure", detail: "Sell flow overtook buys and slowed momentum.", severity: "warning" },
+    { time: "60m", label: "Stabilization", detail: "Price and volume stabilized into a narrower range.", severity: "neutral" },
   ],
   holders: [
-    { address: "CreatorWallet...", percentage: 15 },
-    { address: "Sniper1...", percentage: 5 },
-    { address: "Sniper2...", percentage: 4.5 },
-    { address: "Wallet4...", percentage: 4 },
-    { address: "Wallet5...", percentage: 3.5 },
+    { address: "9bGqv6XwY7tV2hK8mR3pZ5sQ1cN4dF6jT8uE2aH7yP3", percentage: 9.8 },
+    { address: "4tZ6mQ7rU2xV9pH3cD5nK8sY1wJ7gF6qB2aE9hT3uM5", percentage: 7.2 },
+    { address: "F8tYx3QmK7pN4aZ6dH2sL9rW5jV1qX8cT6uB3eD9nP2", percentage: 5.1 },
+    { address: "6hN3pQ8tV2rY7sK5mD1xC9wF4gJ8uB2aT6eZ3qM7nP5", percentage: 4.7 },
+    { address: "8Qm2tZ7kV4rY9pN3cH6sX1dF5gW2jB7uT9aE3qM6nP4", percentage: 3.9 },
   ],
   trades: {
-    buys: 1200,
-    sells: 2220,
-    buyVolumeUsd: 450000,
-    sellVolumeUsd: 1200000,
+    buys: 620,
+    sells: 840,
+    buyVolumeUsd: 420000,
+    sellVolumeUsd: 710000,
     netPressure: "sell",
   },
   endpointProof: [
-    { endpoint: "/v1/token/trades", calls: 12, status: "ok" },
-    { endpoint: "/v1/token/holders", calls: 4, status: "ok" },
-    { endpoint: "/v1/token/security", calls: 1, status: "ok" },
-    { endpoint: "/v1/token/ohlcv", calls: 2, status: "ok" },
-    { endpoint: "/v1/token/overview", calls: 1, status: "ok" },
+    { endpoint: "/defi/token_overview", calls: 1, status: "ok" },
+    { endpoint: "/defi/token_security", calls: 1, status: "ok" },
+    { endpoint: "/defi/v3/ohlcv", calls: 2, status: "ok" },
+    { endpoint: "/defi/v3/token/txs", calls: 3, status: "ok" },
+    { endpoint: "/defi/v3/token/holder", calls: 1, status: "ok" },
+    { endpoint: "/token/v1/holder-positions", calls: 1, status: "ok" },
   ],
   generatedAt: new Date().toISOString(),
   dataMode: "mock",

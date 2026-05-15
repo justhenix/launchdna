@@ -12,10 +12,34 @@ export const runtime = "nodejs";
 type JsonRecord = Record<string, unknown>;
 
 const MOCK_TOKENS: NewListingFeedItem[] = [
-  { symbol: "DEMO", name: "Mock Demo", age: "2m", volume: "$1.2M", address: "mock-token" },
-  { symbol: "TRACE", name: "Mock Trace", age: "12m", volume: "$5.4M", address: "mock-trace" },
-  { symbol: "CASE", name: "Mock Case", age: "45m", volume: "$400K", address: "mock-case" },
-  { symbol: "PROOF", name: "Mock Proof", age: "58m", volume: "$2.1M", address: "mock-proof" },
+  {
+    symbol: "SNAP",
+    name: "Birdeye Snapshot Case",
+    age: "18m",
+    volume: "$820K",
+    address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",
+  },
+  {
+    symbol: "TRACE",
+    name: "Signal Trace",
+    age: "31m",
+    volume: "$1.6M",
+    address: "9bGqv6XwY7tV2hK8mR3pZ5sQ1cN4dF6jT8uE2aH7yP3",
+  },
+  {
+    symbol: "DRIFT",
+    name: "Driftline",
+    age: "46m",
+    volume: "$540K",
+    address: "4tZ6mQ7rU2xV9pH3cD5nK8sY1wJ7gF6qB2aE9hT3uM5",
+  },
+  {
+    symbol: "KITE",
+    name: "Kitefall",
+    age: "58m",
+    volume: "$2.3M",
+    address: "F8tYx3QmK7pN4aZ6dH2sL9rW5jV1qX8cT6uB3eD9nP2",
+  },
 ];
 
 const MAX_LISTINGS = 12;

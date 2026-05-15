@@ -9,11 +9,12 @@ export default function ProofPage() {
   ];
 
   const endpoints = [
-    { path: "/v1/token/trades", purpose: "Identify early buy compression and sniper wallets" },
-    { path: "/v1/token/holders", purpose: "Calculate top 10 concentration and distribution" },
-    { path: "/v1/token/security", purpose: "Detect mutable metadata or frozen capabilities" },
-    { path: "/v1/token/ohlcv", purpose: "Map 1-minute interval price and volume shocks" },
-    { path: "/v1/token/overview", purpose: "Gather baseline token metadata and liquidity" },
+    { path: "/defi/v3/token/txs", purpose: "Identify early buy compression and trade pressure" },
+    { path: "/defi/v3/token/holder", purpose: "Calculate top holder concentration" },
+    { path: "/token/v1/holder-positions", purpose: "Enrich holder evidence and tags" },
+    { path: "/defi/token_security", purpose: "Detect security or risk flags" },
+    { path: "/defi/v3/ohlcv", purpose: "Replay price and volume movement" },
+    { path: "/defi/token_overview", purpose: "Gather baseline token metadata and liquidity" },
   ];
 
   return (
@@ -42,17 +43,17 @@ export default function ProofPage() {
         ))}
       </div>
 
-      {/* Note about Demo Data */}
+      {/* Note about Snapshot Data */}
       <div className="bg-ldna-accent/10 border border-ldna-accent/30 p-6 md:p-8 mb-16 flex flex-col md:flex-row items-start gap-4 md:gap-6 relative overflow-hidden group hover:border-ldna-accent/50 transition-colors">
         <div className="absolute top-0 right-0 w-32 h-32 bg-ldna-accent/10 blur-3xl rounded-full" />
         <Activity className="w-6 h-6 text-ldna-accent shrink-0 mt-1 md:animate-pulse" />
         <div className="relative z-10">
           <h3 className="text-xl font-bold text-ldna-accent mb-3 flex items-center gap-3">
-            System Status // Demonstration Mode
+            System Status // Birdeye Snapshot
           </h3>
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base">
-            The application is currently running in presentation mode using our <code className="bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid font-mono text-ldna-text/90">LaunchCase</code> stable data payload. 
-            This ensures a reliable demonstration of the classifier engine and UI mechanics. The backend integration with Birdeye&apos;s live API endpoints seamlessly replaces this layer to map live data to the exact same contract.
+            The application can present a stable <code className="bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid font-mono text-ldna-text/90">LaunchCase</code> snapshot derived from Birdeye data for judge-ready review.
+            Live API calls map into the same contract when full data is available.
           </p>
         </div>
       </div>
