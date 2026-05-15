@@ -353,17 +353,26 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           {/* Section 04: Timeline */}
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
-              <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> 04 / Launch Timeline</span>
+              <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> 04 / Launch Signal Log</span>
             </h2>
-            <div className="bg-ldna-panel/40 border border-ldna-grid p-6 md:p-8">
+            <div className="bg-ldna-panel/40 border border-ldna-grid p-6 md:p-8 max-w-3xl">
               <div className="relative border-l border-ldna-grid/50 ml-3 space-y-10">
                 {data.timeline.map((event, i) => (
                   <div key={i} className="relative pl-8 group">
-                    <div className={`absolute -left-1.25 top-1.5 w-2.5 h-2.5 rounded-none rotate-45 ${
-                      event.severity === 'danger' ? 'bg-ldna-accent shadow-[0_0_10px_rgba(255,87,26,0.5)]' : 
-                      event.severity === 'warning' ? 'bg-ldna-warning' : 'bg-ldna-muted'
-                    }`} />
-                    <div className="text-xs font-mono text-ldna-muted mb-1.5 group-hover:text-ldna-text transition-colors">{event.time}</div>
+                    <div className="absolute -left-1.25 top-1.5 w-2.5 h-2.5 rounded-none rotate-45 bg-ldna-grid group-hover:bg-ldna-muted transition-colors" />
+                    <div className="flex items-center justify-between gap-4 mb-1.5">
+                      <div className="text-xs font-mono text-ldna-muted group-hover:text-ldna-text transition-colors">{event.time}</div>
+                      <div className={`text-[10px] font-mono px-1.5 py-0.5 border ${
+                        event.severity === 'danger' ? 'bg-ldna-accent/10 text-ldna-accent border-ldna-accent/20' :
+                        event.severity === 'warning' ? 'bg-ldna-warning/10 text-ldna-warning border-ldna-warning/20' :
+                        event.severity === 'good' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                        'bg-ldna-panel border-ldna-grid text-ldna-muted'
+                      }`}>
+                        {event.severity === 'danger' ? 'HIGH' : 
+                         event.severity === 'warning' ? 'MEDIUM' : 
+                         event.severity === 'good' ? 'LOW' : 'NEUTRAL'}
+                      </div>
+                    </div>
                     <TooltipLabel
                       label={event.label}
                       className="font-bold text-ldna-text mb-1.5 text-lg"

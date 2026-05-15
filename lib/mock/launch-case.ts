@@ -83,11 +83,11 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
     };
   }),
   timeline: [
-    { time: "0m", label: "Listing Window", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
-    { time: "4m", label: "Early Volume Spike", detail: "Initial swap burst pushed volume above baseline.", severity: "warning" },
-    { time: "9m", label: "Price Crest", detail: "Price reached a local high before cooling.", severity: "neutral" },
+    { time: "0m", label: "Sample Window Opened", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
+    { time: "4m", label: "Early Buy Compression", detail: "Initial swap burst pushed volume above baseline.", severity: "warning" },
+    { time: "9m", label: "First-Hour Price Peak", detail: "Price reached a local high before cooling.", severity: "neutral" },
     { time: "22m", label: "Sell Pressure", detail: "Sell flow overtook buys and slowed momentum.", severity: "warning" },
-    { time: "60m", label: "Stabilization", detail: "Price and volume stabilized into a narrower range.", severity: "neutral" },
+    { time: "60m", label: "First-Hour Closeout", detail: "Price and volume stabilized into a narrower range.", severity: "neutral" },
   ],
   holders: [
     { address: "9bGqv6XwY7tV2hK8mR3pZ5sQ1cN4dF6jT8uE2aH7yP3", percentage: 9.8 },
