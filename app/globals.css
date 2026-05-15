@@ -24,3 +24,21 @@
   background-image: radial-gradient(var(--color-ldna-grid) 1px, transparent 1px);
   background-size: 40px 40px;
 }
+
+@keyframes scan {
+  from { transform: translateY(-100vh); }
+  to { transform: translateY(100vh); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+.animate-scan {
+  animation: scan 8s linear infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}

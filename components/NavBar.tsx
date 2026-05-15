@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Search, ShieldAlert, BarChart3 } from "lucide-react";
 
 export function NavBar() {
@@ -7,7 +8,13 @@ export function NavBar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 min-w-0">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-6 h-6 bg-ldna-accent group-hover:bg-ldna-text transition-colors duration-200" />
+            <Image
+              src="/launchdna.svg"
+              alt="LaunchDNA"
+              width={24}
+              height={24}
+              className="transition-opacity duration-200 group-hover:opacity-80"
+            />
             <span className="font-mono font-bold text-xl tracking-tight hidden sm:block">LaunchDNA</span>
           </Link>
 

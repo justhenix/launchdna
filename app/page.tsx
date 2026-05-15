@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2, ChevronDown } from "lucide-react";
 import { TooltipLabel } from "@/components/InfoTooltip";
+import SpotlightGrid from "@/components/SpotlightGrid";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen relative">
-      {/* Background Overlay for deeper contrast */}
-      <div className="fixed inset-0 pointer-events-none bg-ldna-bg/50 -z-10 mix-blend-multiply" />
+      <SpotlightGrid />
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden border-b border-ldna-grid">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-ldna-panel via-ldna-bg to-ldna-bg opacity-50"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-ldna-bg/0 via-ldna-bg/20 to-ldna-bg pointer-events-none" />
         
-        {/* Abstract Motif Background Graphic */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-6xl pointer-events-none opacity-20 -z-10">
+        {/* Abstract Motif Background Graphic - kept but refined */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-6xl pointer-events-none opacity-10 -z-10">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <path d="M100 500 Q 300 200 500 400 T 900 300" stroke="#FF571A" strokeWidth="2" fill="none" opacity="0.5" />
             <path d="M100 400 Q 400 600 600 300 T 900 500" stroke="#FFE41A" strokeWidth="1" fill="none" opacity="0.3" strokeDasharray="5,5" />
@@ -24,23 +24,24 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl md:text-7xl font-serif font-medium tracking-tight mb-8 leading-tight">
               Every Token Launch<br />
-              <span className="text-ldna-muted">Leaves Evidence.</span>
+              <span className="text-ldna-muted">Leaves Evidence</span>
             </h1>
             <p className="text-lg md:text-xl text-ldna-muted mb-12 max-w-2xl mx-auto leading-relaxed">
               Find tokens anywhere. Paste the address here.<br />
               LaunchDNA explains the launch using Birdeye data.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
               <Link href="/analyze" className="w-full sm:w-auto px-8 py-4 bg-ldna-accent text-ldna-bg font-bold uppercase tracking-wider hover:bg-ldna-text hover:shadow-[0_0_20px_rgba(255,87,26,0.4)] transition-all duration-300 flex items-center justify-center gap-2 group">
                 Analyze Token <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/case/mock-token" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
-                View Birdeye Snapshot <ShieldAlert className="w-5 h-5" />
+                View Birdeye Snapshot
               </Link>
             </div>
-            <p className="mt-8 text-xs font-mono text-ldna-muted uppercase tracking-widest opacity-60">
-              Not a faster scanner. A forensic explanation layer powered by Birdeye.
-            </p>
+
+            <div className="flex justify-center">
+              <ChevronDown className="w-8 h-8 text-ldna-accent animate-bounce-subtle opacity-70" />
+            </div>
           </div>
         </div>
       </section>
@@ -50,10 +51,10 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
             {[
-              { label: "Birdeye Calls Logged", value: "127" },
-              { label: "Endpoints Mapped", value: "8" },
-              { label: "Launch Archetypes", value: "3" },
-              { label: "First-Hour Replay", value: "Live" },
+              { label: "CALLS", value: "127" },
+              { label: "MAPS", value: "8" },
+              { label: "TYPES", value: "3" },
+              { label: "LIVE", value: "REPLAY" },
             ].map((metric, i) => (
               <div key={i} className="p-8 text-center bg-ldna-panel/90 backdrop-blur-md hover:bg-ldna-panel transition-colors">
                 <div className="text-3xl md:text-4xl font-mono font-bold text-ldna-text mb-3">{metric.value}</div>
