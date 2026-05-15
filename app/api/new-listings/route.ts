@@ -14,7 +14,7 @@ type JsonRecord = Record<string, unknown>;
 const MOCK_TOKENS: NewListingFeedItem[] = [
   {
     symbol: "SNAP",
-    name: "Birdeye Snapshot Case",
+    name: "Case Files",
     age: "18m",
     volume: "$820K",
     address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",

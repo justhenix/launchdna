@@ -37,7 +37,7 @@ export function Footer() {
                 <Link href="/analyze" className="hover:text-ldna-accent transition-colors">Analyzer</Link>
               </li>
               <li>
-                <Link href="/case/mock-token" className="hover:text-ldna-accent transition-colors">Birdeye Snapshot Case</Link>
+                <Link href="/case/mock-token" className="hover:text-ldna-accent transition-colors">Case Files</Link>
               </li>
               <li>
                 <Link href="/proof" className="hover:text-ldna-accent transition-colors">Architecture & Proof</Link>

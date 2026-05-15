@@ -12,7 +12,7 @@ LaunchDNA classifies the first hour of new Solana token launches. Instead of act
 
 ## Why It Is Different
 
-Token radars show movement. LaunchDNA shows evidence. It avoids generic metrics and focuses on explainable heuristics. Every classification is backed by concrete data points, resulting in a Birdeye Snapshot Case rather than a standard crypto UI.
+Token radars show movement. LaunchDNA shows evidence. It avoids generic metrics and focuses on explainable heuristics. Every classification is backed by concrete data points, resulting in Case Files rather than a standard crypto UI.
 
 ## Core User Flow
 

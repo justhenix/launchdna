@@ -5,7 +5,7 @@ export type { EvidenceSeverity, LaunchArchetype, LaunchCase } from "@/types/laun
 export const MOCK_LAUNCH_CASE: LaunchCase = {
   token: {
     address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",
-    name: "Birdeye Snapshot Case",
+    name: "Case Files",
     symbol: "SNAP",
     chain: "solana",
   },

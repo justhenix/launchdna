@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2, ChevronDown } from "lucide-react";
 import { TooltipLabel } from "@/components/InfoTooltip";
 import SpotlightGrid from "@/components/SpotlightGrid";
+import LiveMetricStrip from "@/components/LiveMetricStrip";
 
 export default function Home() {
   return (
@@ -35,7 +36,7 @@ export default function Home() {
                 Analyze Token <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/case/mock-token" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
-                View Birdeye Snapshot
+                View Case Files
               </Link>
             </div>
 
@@ -46,24 +47,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Metric Strip */}
-      <section className="bg-ldna-grid border-b border-ldna-grid">
-        <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
-            {[
-              { label: "CALLS", value: "127" },
-              { label: "MAPS", value: "8" },
-              { label: "TYPES", value: "3" },
-              { label: "LIVE", value: "REPLAY" },
-            ].map((metric, i) => (
-              <div key={i} className="p-8 text-center bg-ldna-panel/90 backdrop-blur-md hover:bg-ldna-panel transition-colors">
-                <div className="text-3xl md:text-4xl font-mono font-bold text-ldna-text mb-3">{metric.value}</div>
-                <div className="text-xs uppercase tracking-widest text-ldna-muted font-bold">{metric.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Live Metric Strip */}
+      <LiveMetricStrip />
 
       {/* Problem Comparison */}
       <section className="py-24 border-b border-ldna-grid bg-ldna-bg">
@@ -117,16 +102,16 @@ export default function Home() {
       <section className="py-24 border-b border-ldna-grid bg-[radial-gradient(ellipse_at_bottom,var(--tw-gradient-stops))] from-ldna-panel/80 to-ldna-bg">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
-            <h2 className="text-3xl font-serif">Birdeye Snapshot Case</h2>
+            <h2 className="text-3xl font-serif">Case Files</h2>
             <Link href="/case/mock-token" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
-              Open Birdeye Snapshot <ArrowRight className="w-4 h-4" />
+              Open Case File <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           
           <div className="border border-ldna-grid bg-ldna-bg/80 backdrop-blur-sm p-8 md:p-10 relative group cursor-pointer hover:border-ldna-accent/40 hover:shadow-[0_0_30px_rgba(255,87,26,0.05)] transition-all duration-500">
             <div className="absolute top-0 right-0 p-3 border-b border-l border-ldna-grid font-mono text-xs text-ldna-muted group-hover:bg-ldna-panel group-hover:text-ldna-accent transition-colors flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full animate-pulse" />
-              <TooltipLabel label="Birdeye Snapshot" className="text-ldna-accent uppercase tracking-widest" align="end" />
+              <TooltipLabel label="Case Files" className="text-ldna-accent uppercase tracking-widest" align="end" />
               <span className="text-ldna-muted">{"// LDNA-842"}</span>
             </div>
             
@@ -135,7 +120,7 @@ export default function Home() {
                 SNAP
               </div>
               <div>
-                <h3 className="text-3xl font-bold mb-3 tracking-tight">Birdeye Snapshot Case</h3>
+                <h3 className="text-3xl font-bold mb-3 tracking-tight">Case Files</h3>
                 <div className="flex flex-wrap gap-3">
                   <TooltipLabel
                     label="Liquidity Mirage"
