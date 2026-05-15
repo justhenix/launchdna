@@ -65,17 +65,6 @@ export default function LiveMetricStrip() {
             </div>
           ))}
         </div>
-        
-        {/* Helper Text */}
-        <div className="bg-ldna-panel/90 backdrop-blur-md px-4 py-3 border-t border-ldna-grid text-center text-xs font-mono text-ldna-muted">
-          {!data || data.totalBirdeyeCalls === 0 ? (
-             "Run analyzer to populate live Birdeye proof."
-          ) : data.totalBirdeyeCalls < 50 ? (
-             `Minimum target: 50+ Birdeye API calls. Current session: ${data.totalBirdeyeCalls}.`
-          ) : (
-             "Minimum target reached: 50+ Birdeye API calls logged."
-          )}
-        </div>
       </div>
     </section>
   );
