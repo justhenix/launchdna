@@ -30,18 +30,18 @@ export default function SpotlightGrid() {
 
       {/* 2. Spotlight Overlay: Highlighted Grid */}
       <div
-        className="absolute inset-0 bg-[radial-gradient(var(--color-ldna-accent)_1px,transparent_1px)] [background-size:32px_32px]"
+        className="absolute inset-0 bg-[radial-gradient(var(--color-ldna-accent)_1.5px,transparent_1.5px)] [background-size:32px_32px]"
         style={{
-          maskImage: `radial-gradient(350px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(350px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), black 0%, transparent 100%)`,
+          maskImage: `radial-gradient(450px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(450px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), black 0%, transparent 100%)`,
         }}
       />
 
       {/* 3. The Glow: Soft spotlight highlight */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-40"
         style={{
-          background: `radial-gradient(500px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), rgba(255, 87, 26, 0.15), transparent 100%)`,
+          background: `radial-gradient(600px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), rgba(255, 87, 26, 0.25), transparent 100%)`,
         }}
       />
     </div>
