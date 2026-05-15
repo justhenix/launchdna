@@ -267,7 +267,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       {data.dataMode === "mock" && (
         <div className="mb-12 -mt-6 text-xs font-mono text-ldna-muted flex items-center gap-2">
           <Database className="w-3.5 h-3.5" />
-          <span>Captured from Birdeye data for stable judging and demo playback.</span>
+          <span>Captured from Birdeye data for forensic analysis and demo playback.</span>
         </div>
       )}
 
@@ -293,7 +293,6 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
               <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay</span>
               <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20 flex items-center gap-1.5">
-                SOURCE: BIRDEYE
                 <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="start" />
               </span>
             </h2>
@@ -395,7 +394,6 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
               <span className="flex items-center gap-2"><Users className="w-4 h-4 shrink-0" /> 05 / Top Holders</span>
               <span className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
                 <TooltipLabel
                   label="Holder Concentration"
                   className="text-[10px] bg-ldna-panel border border-ldna-grid px-2 py-1 text-ldna-muted uppercase tracking-widest"
@@ -432,7 +430,6 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <section>
               <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
                 <span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" /> Labeled Wallets</span>
-                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
               </h2>
               <div className="bg-ldna-panel/80 border border-ldna-grid p-8">
                 <div className="space-y-5">
@@ -457,7 +454,6 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                   <TooltipLabel label="Trade Pressure" align="start" />
                 </span>
               </span>
-              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
             </h2>
             <div className="bg-ldna-panel/80 border border-ldna-grid p-8">
               <div className="grid grid-cols-2 gap-6 mb-8">

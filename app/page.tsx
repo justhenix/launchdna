@@ -22,10 +22,6 @@ export default function Home() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-mono font-bold text-ldna-accent border border-ldna-accent/30 bg-ldna-accent/10 rounded-full mb-8 shadow-[0_0_15px_rgba(255,87,26,0.15)]">
-              <span className="w-2 h-2 rounded-full bg-ldna-accent animate-pulse" />
-              <span>Birdeye BIP Sprint 4</span>
-            </div>
             <h1 className="text-5xl md:text-7xl font-serif font-medium tracking-tight mb-8 leading-tight">
               Every Token Launch<br />
               <span className="text-ldna-muted">Leaves Evidence.</span>
@@ -172,7 +168,7 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-6 text-xs font-mono text-ldna-muted">
-              Captured from Birdeye data for stable judging and demo playback.
+              Captured from Birdeye data for forensic analysis and demo playback.
             </div>
           </div>
         </div>

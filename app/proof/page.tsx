@@ -22,13 +22,9 @@ export default function ProofPage() {
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-10 mix-blend-screen" />
 
       <div className="mb-16 text-center max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-mono font-bold text-ldna-accent border border-ldna-accent/30 bg-ldna-accent/10 rounded-full mb-6 shadow-[0_0_15px_rgba(255,87,26,0.15)]">
-          <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full animate-pulse" />
-          Birdeye BIP Sprint 4 Submission
-        </div>
         <h1 className="text-4xl md:text-6xl font-serif mb-6 tracking-tight">Technical Architecture</h1>
         <p className="text-ldna-muted text-lg leading-relaxed">
-          LaunchDNA is designed to fulfill the Birdeye BIP Sprint 4 competition requirements. 
+          LaunchDNA is a forensic launch classifier for Solana tokens. 
           This page outlines our system architecture and data utilization strategy.
         </p>
       </div>
@@ -52,7 +48,7 @@ export default function ProofPage() {
             System Status // Birdeye Snapshot
           </h3>
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base">
-            The application can present a stable <code className="bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid font-mono text-ldna-text/90">LaunchCase</code> snapshot derived from Birdeye data for judge-ready review.
+            The application can present a stable <code className="bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid font-mono text-ldna-text/90">LaunchCase</code> snapshot derived from Birdeye data for forensic review.
             Live API calls map into the same contract when full data is available.
           </p>
         </div>

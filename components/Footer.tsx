@@ -39,10 +39,11 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-mono text-sm font-bold mb-4 uppercase tracking-wider text-ldna-text">Competition</h4>
+            <h4 className="font-mono text-sm font-bold mb-4 uppercase tracking-wider text-ldna-text">Resources</h4>
             <ul className="space-y-3 text-sm text-ldna-muted">
-              <li>Built for Birdeye BIP Sprint 4</li>
-              <li>Superteam Earn Submission</li>
+              <li>
+                <a href="#" className="hover:text-ldna-accent transition-colors">Documentation</a>
+              </li>
               <li>
                 <a href="#" className="hover:text-ldna-accent transition-colors">Live App</a>
               </li>

@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LaunchDNA
 
-## Getting Started
+Every Token Launch Leaves Evidence.
 
-First, run the development server:
+[Live Demo Placeholder](#) | [GitHub Repository Placeholder](#) | [X Thread Placeholder](#)
+
+LaunchDNA is a post-discovery forensic explanation layer for Solana tokens. Find tokens anywhere, paste the address here, and LaunchDNA explains the launch using Birdeye data. It replays the first hour of a token's lifecycle to generate a forensic case file based on evidence, not hype.
+
+## What It Does
+
+LaunchDNA classifies the first hour of new Solana token launches. Instead of acting as a faster scanner for trading like Trojan or pump.fun, it acts as an investigation lab. Users paste a Solana token address, and the system evaluates market, trade, holder, security, and OHLCV data to classify the launch behavior into specific archetypes.
+
+## Why It Is Different
+
+Token radars show movement. LaunchDNA shows evidence. It avoids generic metrics and focuses on explainable heuristics. Every classification is backed by concrete data points, resulting in a Birdeye Snapshot Case rather than a standard crypto UI.
+
+## Core User Flow
+
+1. User pastes a Solana token address or selects a new listing.
+2. The application fetches data from multiple Birdeye API endpoints.
+3. The system normalizes the data into a unified `LaunchCase` object.
+4. The heuristic classifier processes the `LaunchCase`.
+5. The UI presents a detailed forensic case file with evidence cards and a first-hour replay chart.
+6. The user can view the API proof page verifying the data origin and endpoint calls.
+
+## Launch Archetypes
+
+Tokens are classified into one of three archetypes based on forensic evidence:
+
+*   **Sniper Swarm**: High holder concentration, fast first-hour price spikes, compressed early buys, and suspicious trade pressure.
+*   **Liquidity Mirage**: Early volume spikes followed by weak post-spike structure, increasing sell pressure, and unstable price to liquidity ratios.
+*   **Organic Grind**: Smoother price movements, healthier token distribution, lower top holder concentration, and balanced buy/sell pressure.
+
+## Architecture
+
+New listing or pasted token -> Birdeye API -> Normalized `LaunchCase` -> Heuristic Classifier -> Forensic Case File
+
+### Data Contract
+
+The `LaunchCase` object is the core data contract powering both the UI and backend. The application is built to handle partial evidence gracefully. Very new tokens may have incomplete Birdeye history; LaunchDNA processes what is available and returns a partial case safely without failing.
+
+### Classification Logic
+
+The classifier uses explainable heuristics. It relies on strict thresholds and evidence scoring based on the `LaunchCase` data, ensuring the results are transparent and avoid black-box ML models.
+
+## Birdeye Endpoints Used
+
+LaunchDNA integrates deeply with the Birdeye API to source forensic data:
+
+*   `/defi/v2/tokens/new_listing`
+*   `/defi/token_overview`
+*   `/defi/token_security`
+*   `/defi/v3/ohlcv`
+*   `/defi/v3/token/txs`
+*   `/defi/v3/token/holder`
+*   `/token/v1/holder-positions`
+
+## Tech Stack
+
+*   Next.js
+*   TypeScript
+*   Tailwind CSS
+*   Recharts
+*   Birdeye API
+
+## Local Setup
+
+Ensure you have Bun installed.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set your environment variables in `.env`:
+```env
+BIRDEYE_API_KEY=your_api_key_here
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the application:
+```bash
+bun dev
+bun run lint
+bun run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Screenshots
 
-## Learn More
+*   [Landing Page Screenshot Placeholder]
+*   [Analyzer Interface Screenshot Placeholder]
+*   [Forensic Case File Screenshot Placeholder]
+*   [API Proof Page Screenshot Placeholder]
 
-To learn more about Next.js, take a look at the following resources:
+## Purpose
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+LaunchDNA is a forensic analysis tool designed to help users understand the mechanics of Solana token launches.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Disclaimer: LaunchDNA is a forensic analysis tool. It does not predict profits and is not financial advice.*
