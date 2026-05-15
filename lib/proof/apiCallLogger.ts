@@ -1,4 +1,5 @@
 import type { BirdeyeEndpoint } from "@/lib/birdeye/endpoints";
+import { BIRDEYE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import type { LaunchCase } from "@/types/launch-case";
 
 type EndpointStatus = NonNullable<LaunchCase["endpointProof"][number]["status"]>;
@@ -92,10 +93,22 @@ export function fallbackEndpointProof(
 
 export function getApiCallStats() {
   const entries = getStore();
-  const endpointProof = buildEndpointProof(entries);
+  const endpointOrder = Object.values(BIRDEYE_ENDPOINTS);
+  const endpointProof = buildEndpointProof(entries, endpointOrder);
 
   return {
     totalCalls: entries.reduce((total, entry) => total + entry.calls, 0),
+    okCalls: entries
+      .filter((entry) => entry.status === "ok")
+      .reduce((total, entry) => total + entry.calls, 0),
+    failedCalls: entries
+      .filter((entry) => entry.status === "failed")
+      .reduce((total, entry) => total + entry.calls, 0),
+    fallbackCalls: entries
+      .filter((entry) => entry.status === "fallback")
+      .reduce((total, entry) => total + entry.calls, 0),
+    endpointsIntegrated: endpointOrder,
+    generatedAt: new Date().toISOString(),
     endpointProof,
     entries,
   };

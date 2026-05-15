@@ -25,7 +25,7 @@ export function NavBar() {
             </Link>
             <Link href="/case/mock-token" className="hover:text-ldna-text transition-colors flex items-center gap-2 truncate">
               <ShieldAlert className="w-4 h-4 shrink-0" />
-              Birdeye Snapshot Case
+              Case Files
             </Link>
             <Link href="/proof" className="hover:text-ldna-text transition-colors flex items-center gap-2 truncate">
               <BarChart3 className="w-4 h-4 shrink-0" />

@@ -1,12 +1,18 @@
 import { Database, Server, Cpu, FileText, CheckCircle2, Activity } from "lucide-react";
 
+import { getApiCallStats } from "@/lib/proof/apiCallLogger";
+
+export const dynamic = "force-dynamic";
+
 export default function ProofPage() {
+  const proof = getApiCallStats();
   const stats = [
-    { label: "Total API Calls Logged", value: "1,248", color: "text-ldna-text" },
-    { label: "Unique Tokens Analyzed", value: "412", color: "text-ldna-text" },
-    { label: "Case Files Generated", value: "412", color: "text-ldna-text" },
-    { label: "Average Time to Classify", value: "1.2s", color: "text-ldna-accent" },
+    { label: "Total API Calls Logged", value: proof.totalCalls.toLocaleString(), color: "text-ldna-text" },
   ];
+  const callMessage =
+    proof.totalCalls < 50
+      ? "Minimum target: 50+ Birdeye API calls. Analyze more tokens before submission."
+      : `${proof.totalCalls.toLocaleString()} Birdeye API calls logged.`;
 
   const endpoints = [
     { path: "/defi/v3/token/txs", purpose: "Identify early buy compression and trade pressure" },
@@ -30,11 +36,11 @@ export default function ProofPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-ldna-grid border border-ldna-grid mb-16 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+      <div className="max-w-md mx-auto w-full bg-ldna-grid border border-ldna-grid mb-16 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-ldna-panel/80 p-6 md:p-8 text-center hover:bg-ldna-panel transition-colors">
-            <div className={`text-3xl md:text-4xl font-mono font-bold mb-3 ${stat.color}`}>{stat.value}</div>
-            <div className="text-[10px] md:text-xs font-mono text-ldna-muted uppercase tracking-widest">{stat.label}</div>
+          <div key={i} className="bg-ldna-panel/80 p-8 md:p-12 text-center hover:bg-ldna-panel transition-colors">
+            <div className={`text-4xl md:text-6xl font-mono font-bold mb-4 ${stat.color}`}>{stat.value}</div>
+            <div className="text-xs md:text-sm font-mono text-ldna-muted uppercase tracking-widest">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -45,12 +51,17 @@ export default function ProofPage() {
         <Activity className="w-6 h-6 text-ldna-accent shrink-0 mt-1 md:animate-pulse" />
         <div className="relative z-10">
           <h3 className="text-xl font-bold text-ldna-accent mb-3 flex items-center gap-3">
-            System Status // Birdeye Snapshot
+            Live Birdeye Proof
           </h3>
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base">
-            The application can present a stable <code className="bg-ldna-bg px-1.5 py-0.5 border border-ldna-grid font-mono text-ldna-text/90">LaunchCase</code> snapshot derived from Birdeye data for forensic review.
-            Live API calls map into the same contract when full data is available.
+            LaunchDNA logs every Birdeye request used during token analysis. Successful calls feed the LaunchCase classifier. Failed calls are handled safely so the forensic report still renders without crashing.
           </p>
+          <div className="mt-3 text-xs md:text-sm font-mono text-ldna-muted">
+            {callMessage}
+          </div>
+          <div className="mt-2 text-xs md:text-sm font-mono text-ldna-muted">
+            Endpoints integrated: {proof.endpointsIntegrated.length}. Generated at: {proof.generatedAt}.
+          </div>
         </div>
       </div>
 
