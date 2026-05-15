@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 export const TOOLTIP_COPY: Record<string, string> = {
@@ -39,26 +39,72 @@ type InfoTooltipProps = {
   className?: string;
 };
 
-export function InfoTooltip({ label, text, align = "center", className }: InfoTooltipProps) {
+export function InfoTooltip({ label, text, align: initialAlign = "center", className }: InfoTooltipProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
+  const [align, setAlign] = useState<TooltipAlign>(initialAlign);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const updateAlignment = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    
+    // Safety thresholds: only flip if absolutely necessary to prevent severe overflow
+    if (initialAlign === "start") {
+      // If we are at the right edge (less than 100px from edge), flip to 'end'
+      if (rect.left > viewportWidth - 100) {
+        setAlign("end");
+      } else {
+        setAlign("start");
+      }
+    } else if (initialAlign === "end") {
+      // If we are at the left edge (less than 100px from edge), flip to 'start'
+      if (rect.right < 100) {
+        setAlign("start");
+      } else {
+        setAlign("end");
+      }
+    } else {
+      // For center, check if we're near either edge
+      if (rect.left + rect.width / 2 > viewportWidth - 160) {
+        setAlign("end");
+      } else if (rect.left + rect.width / 2 < 160) {
+        setAlign("start");
+      } else {
+        setAlign("center");
+      }
+    }
+  }, [initialAlign]);
+
+
+  useEffect(() => {
+    if (open) {
+      updateAlignment();
+      window.addEventListener("resize", updateAlignment);
+      return () => window.removeEventListener("resize", updateAlignment);
+    }
+  }, [open, updateAlignment]);
 
   const alignClass =
     align === "start"
-      ? "left-0"
+      ? "left-0 translate-x-0"
       : align === "end"
-        ? "right-0"
+        ? "right-0 translate-x-0"
         : "left-1/2 -translate-x-1/2";
 
   return (
-    <span className={cn("relative inline-flex items-center", className)}>
+    <span
+      className={cn("relative inline-flex items-center", className)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <button
+        ref={triggerRef}
         type="button"
         aria-label={`Information about ${label}`}
         aria-describedby={open ? id : undefined}
         aria-expanded={open}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         onClick={(event) => {
@@ -81,10 +127,10 @@ export function InfoTooltip({ label, text, align = "center", className }: InfoTo
         id={id}
         role="tooltip"
         className={cn(
-          "absolute top-full z-50 mt-2 w-64 border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)] normal-case tracking-normal",
-          "transition-opacity",
+          "absolute top-full z-[100] mt-2 w-max max-w-[min(320px,calc(100vw-2rem))] border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)] normal-case tracking-normal break-words whitespace-normal pointer-events-none",
+          "transition-opacity duration-200",
           alignClass,
-          open ? "opacity-100" : "pointer-events-none opacity-0",
+          open ? "opacity-100 pointer-events-auto" : "opacity-0",
         )}
       >
         {text}

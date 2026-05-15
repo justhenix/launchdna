@@ -212,92 +212,92 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
   const labeledWallets = data.labeledWallets ?? [];
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
+    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-7xl relative">
       <div className="fixed inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay -z-10" />
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
 
       {data.dataMode === "partial" && (
-        <div className="mb-8 border border-ldna-warning/30 bg-ldna-panel/60 px-6 py-4">
+        <div className="mb-12 border border-ldna-warning/30 bg-ldna-panel/60 px-8 py-6">
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-ldna-warning uppercase tracking-widest">
             <TooltipLabel label="Partial Evidence" align="start" />
           </div>
-          <div className="mt-2 text-sm font-mono text-ldna-warning/80">
+          <div className="mt-3 text-sm font-mono text-ldna-warning/80 leading-relaxed">
             Some Birdeye endpoints returned incomplete data, usually because the token is very new.
           </div>
         </div>
       )}
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-8 border-b border-ldna-grid relative">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 pb-10 border-b border-ldna-grid relative gap-6">
         <div className="absolute top-0 right-0 w-1/3 h-px bg-linear-to-r from-transparent via-ldna-accent/50 to-transparent" />
         
-        <div>
-          <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-4 flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-5 flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse" />
             <span>{"// CASE FILE"}</span>
-            <span className="text-ldna-muted">{data.token.address.slice(0,12)}...</span>
+            <span className="text-ldna-muted break-all">{data.token.address}</span>
             {data.dataMode === "mock" && (
               <TooltipLabel
                 label="Birdeye Snapshot"
-                className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-2 uppercase tracking-widest"
-                align="end"
+                className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-2 uppercase tracking-widest shrink-0"
+                align="start"
               />
             )}
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-2 flex items-center gap-4 tracking-tight">
-            {data.token.name}
-            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-2 py-1 bg-ldna-panel/50">${data.token.symbol}</span>
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-3 flex flex-wrap items-center gap-4 tracking-tight">
+            <span className="break-words max-w-full">{data.token.name}</span>
+            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-3 py-1.5 bg-ldna-panel/50 shrink-0">${data.token.symbol}</span>
           </h1>
         </div>
-        <div className="mt-6 md:mt-0 text-left md:text-right">
-          <div className="text-xs font-mono text-ldna-muted mb-2 uppercase tracking-widest">Classification Result</div>
-          <div className="inline-flex items-center gap-3 px-4 py-2 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative overflow-hidden group">
+        <div className="mt-4 lg:mt-0 text-left lg:text-right shrink-0">
+          <div className="text-xs font-mono text-ldna-muted mb-3 uppercase tracking-widest">Classification Result</div>
+          <div className="inline-flex flex-wrap items-center gap-4 px-6 py-3 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative group">
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-            <ShieldAlert className="w-5 h-5 text-ldna-accent" />
+            <ShieldAlert className="w-5 h-5 text-ldna-accent shrink-0" />
             <TooltipLabel
               label={data.classification.archetype}
-              className="font-mono font-bold text-lg text-ldna-accent uppercase tracking-wider"
-              align="end"
+              className="font-mono font-bold text-lg md:text-xl text-ldna-accent uppercase tracking-wider whitespace-nowrap"
+              align="start"
             />
-            <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-3">{data.classification.confidence}% CONF</span>
+            <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-4 whitespace-nowrap">{data.classification.confidence}% CONF</span>
           </div>
         </div>
       </div>
 
       {data.dataMode === "mock" && (
-        <div className="mb-8 -mt-4 text-xs font-mono text-ldna-muted flex items-center gap-2">
+        <div className="mb-12 -mt-6 text-xs font-mono text-ldna-muted flex items-center gap-2">
           <Database className="w-3.5 h-3.5" />
           <span>Captured from Birdeye data for stable judging and demo playback.</span>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-12 gap-12 xl:gap-16">
         
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-12">
+        <div className="lg:col-span-8 space-y-16">
           
           {/* Section 01: Summary */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex justify-between items-end">
               <span>01 / Launch Summary</span>
             </h2>
-            <div className="bg-ldna-panel/80 backdrop-blur-sm border border-ldna-grid p-6 md:p-8 relative">
+            <div className="bg-ldna-panel/80 backdrop-blur-sm border border-ldna-grid p-8 md:p-10 relative">
               <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-ldna-accent" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-ldna-accent" />
-              <p className="text-lg md:text-xl leading-relaxed text-ldna-text/90 font-serif">{data.classification.summary}</p>
+              <p className="text-lg md:text-xl leading-loose text-ldna-text/90 font-serif">{data.classification.summary}</p>
             </div>
           </section>
 
           {/* Section 02: Replay Chart */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
               <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay</span>
-              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20 flex items-center gap-1.5">
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20 flex items-center gap-1.5">
                 SOURCE: BIRDEYE
-                <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="end" />
+                <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="start" />
               </span>
             </h2>
-            <div className="bg-ldna-panel/60 border border-ldna-grid p-6 h-96 relative group">
+            <div className="bg-ldna-panel/60 border border-ldna-grid p-8 h-[400px] relative group">
               {/* Scanline effect */}
               <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-size-[100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
               <ResponsiveContainer width="100%" height="100%">
@@ -324,27 +324,27 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
           {/* Section 03: Evidence Grid */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
               <span className="flex items-center gap-2"><Crosshair className="w-4 h-4" /> 03 / Key Evidence</span>
-              <span className="text-[10px] bg-ldna-grid text-ldna-muted px-1.5 py-0.5 border border-ldna-grid">HEURISTIC MATCHES</span>
+              <span className="text-[10px] bg-ldna-grid text-ldna-muted px-2 py-1 border border-ldna-grid">HEURISTIC MATCHES</span>
             </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-6">
               {data.evidence.map((ev, i) => (
-                <div key={i} className="bg-ldna-panel/80 border border-ldna-grid p-6 hover:border-ldna-accent/30 transition-colors">
-                  <div className="flex items-start justify-between mb-4">
+                <div key={i} className="bg-ldna-panel/80 border border-ldna-grid p-8 hover:border-ldna-accent/30 transition-colors">
+                  <div className="flex items-start justify-between mb-6">
                     <TooltipLabel
                       label={ev.label}
                       className="text-xs font-mono font-bold uppercase tracking-wider text-ldna-text/80"
                       align="start"
                     />
-                    {ev.severity === 'danger' && <AlertTriangle className="w-4 h-4 text-ldna-accent animate-pulse" />}
-                    {ev.severity === 'warning' && <AlertTriangle className="w-4 h-4 text-ldna-warning" />}
-                    {ev.severity === 'good' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                    {ev.severity === 'danger' && <AlertTriangle className="w-5 h-5 text-ldna-accent animate-pulse" />}
+                    {ev.severity === 'warning' && <AlertTriangle className="w-5 h-5 text-ldna-warning" />}
+                    {ev.severity === 'good' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                   </div>
-                  <div className={`text-3xl font-mono font-bold mb-3 ${ev.severity === 'danger' ? 'text-ldna-accent shadow-ldna-accent' : ev.severity === 'warning' ? 'text-ldna-warning' : 'text-ldna-text'}`}>
+                  <div className={`text-4xl font-mono font-bold mb-4 ${ev.severity === 'danger' ? 'text-ldna-accent shadow-ldna-accent' : ev.severity === 'warning' ? 'text-ldna-warning' : 'text-ldna-text'}`}>
                     {ev.value}
                   </div>
-                  <p className="text-sm text-ldna-muted leading-relaxed">{ev.explanation}</p>
+                  <p className="text-base text-ldna-muted leading-relaxed">{ev.explanation}</p>
                 </div>
               ))}
             </div>
@@ -352,17 +352,17 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
           {/* Section 04: Timeline */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex justify-between items-end">
               <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> 04 / Launch Signal Log</span>
             </h2>
-            <div className="bg-ldna-panel/40 border border-ldna-grid p-6 md:p-8 max-w-3xl">
-              <div className="relative border-l border-ldna-grid/50 ml-3 space-y-10">
+            <div className="bg-ldna-panel/40 border border-ldna-grid p-8 md:p-10 max-w-3xl">
+              <div className="relative border-l border-ldna-grid/50 ml-3 space-y-12">
                 {data.timeline.map((event, i) => (
                   <div key={i} className="relative pl-8 group">
                     <div className="absolute -left-1.25 top-1.5 w-2.5 h-2.5 rounded-none rotate-45 bg-ldna-grid group-hover:bg-ldna-muted transition-colors" />
-                    <div className="flex items-center justify-between gap-4 mb-1.5">
+                    <div className="flex items-center justify-between gap-4 mb-2">
                       <div className="text-xs font-mono text-ldna-muted group-hover:text-ldna-text transition-colors">{event.time}</div>
-                      <div className={`text-[10px] font-mono px-1.5 py-0.5 border ${
+                      <div className={`text-[10px] font-mono px-2 py-1 border ${
                         event.severity === 'danger' ? 'bg-ldna-accent/10 text-ldna-accent border-ldna-accent/20' :
                         event.severity === 'warning' ? 'bg-ldna-warning/10 text-ldna-warning border-ldna-warning/20' :
                         event.severity === 'good' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
@@ -375,10 +375,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                     </div>
                     <TooltipLabel
                       label={event.label}
-                      className="font-bold text-ldna-text mb-1.5 text-lg"
+                      className="font-bold text-ldna-text mb-2 text-xl"
                       align="start"
                     />
-                    <div className="text-sm text-ldna-muted/80">{event.detail}</div>
+                    <div className="text-base text-ldna-muted/80 leading-relaxed">{event.detail}</div>
                   </div>
                 ))}
               </div>
@@ -388,37 +388,37 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
         </div>
 
         {/* Sidebar Column */}
-        <div className="space-y-8">
+        <div className="lg:col-span-4 space-y-12">
           
           {/* Section 05: Holder Concentration */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
-              <span className="flex items-center gap-2"><Users className="w-4 h-4" /> 05 / Top Holders</span>
-              <span className="flex items-center gap-2">
-                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+              <span className="flex items-center gap-2"><Users className="w-4 h-4 shrink-0" /> 05 / Top Holders</span>
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
                 <TooltipLabel
                   label="Holder Concentration"
-                  className="text-[10px] bg-ldna-panel border border-ldna-grid px-1.5 py-0.5 text-ldna-muted uppercase tracking-widest"
-                  align="end"
+                  className="text-[10px] bg-ldna-panel border border-ldna-grid px-2 py-1 text-ldna-muted uppercase tracking-widest"
+                  align="start"
                 />
               </span>
             </h2>
-            <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
-              <div className="space-y-4">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-8">
+              <div className="space-y-5">
                 {topHolders.length === 0 ? (
                   <div className="text-xs font-mono text-ldna-muted leading-relaxed uppercase tracking-tight">
                     <div>Holder share unavailable in current Birdeye sample.</div>
-                    <div className="mt-2 text-ldna-muted/70">Wallet labels may still be available separately.</div>
+                    <div className="mt-3 text-ldna-muted/70">Wallet labels may still be available separately.</div>
                   </div>
                 ) : (
                   topHolders
                     .map((holder, i) => (
-                    <div key={i} className="flex items-center justify-between group">
-                      <div className="flex flex-col">
-                        <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
-                        {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
+                    <div key={i} className="flex items-center justify-between group gap-4">
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors truncate">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
+                        {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-1 truncate">{holder.tag}</span>}
                       </div>
-                      <div className="font-mono font-bold text-ldna-text">
+                      <div className="font-mono font-bold text-ldna-text shrink-0">
                         {Math.min(100, holder.percentage).toFixed(2)}%
                       </div>
                     </div>
@@ -430,16 +430,16 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
           {labeledWallets.length > 0 && (
             <section>
-              <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
-                <span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4" /> Labeled Wallets</span>
-                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+              <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
+                <span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 shrink-0" /> Labeled Wallets</span>
+                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
               </h2>
-              <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
-                <div className="space-y-4">
+              <div className="bg-ldna-panel/80 border border-ldna-grid p-8">
+                <div className="space-y-5">
                   {labeledWallets.map((wallet, i) => (
                     <div key={`${wallet.address}-${i}`} className="flex items-center justify-between gap-4 group">
-                      <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{wallet.address.slice(0,6)}...{wallet.address.slice(-4)}</span>
-                      <span className="text-[10px] font-mono uppercase text-ldna-accent text-right">{wallet.tag}</span>
+                      <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors truncate">{wallet.address.slice(0,6)}...{wallet.address.slice(-4)}</span>
+                      <span className="text-[10px] font-mono uppercase text-ldna-accent text-right shrink-0">{wallet.tag}</span>
                     </div>
                   ))}
                 </div>
@@ -449,28 +449,28 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
           {/* Section 06: Trade Pressure */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
               <span className="flex items-center gap-2">
-                <Activity className="w-4 h-4" />
+                <Activity className="w-4 h-4 shrink-0" />
                 <span className="inline-flex items-center gap-2">
                   06 /
                   <TooltipLabel label="Trade Pressure" align="start" />
                 </span>
               </span>
-              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+              <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
             </h2>
-            <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
-              <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-8">
+              <div className="grid grid-cols-2 gap-6 mb-8">
                 <div>
-                  <div className="text-xs font-mono text-ldna-muted mb-1.5 uppercase">Total Buys</div>
-                  <div className="font-mono text-2xl text-green-500">{data.trades.buys}</div>
+                  <div className="text-xs font-mono text-ldna-muted mb-2 uppercase">Total Buys</div>
+                  <div className="font-mono text-3xl text-green-500">{data.trades.buys}</div>
                 </div>
                 <div>
-                  <div className="text-xs font-mono text-ldna-muted mb-1.5 uppercase">Total Sells</div>
-                  <div className="font-mono text-2xl text-ldna-accent">{data.trades.sells}</div>
+                  <div className="text-xs font-mono text-ldna-muted mb-2 uppercase">Total Sells</div>
+                  <div className="font-mono text-3xl text-ldna-accent">{data.trades.sells}</div>
                 </div>
               </div>
-              <div className="w-full h-2 bg-ldna-grid flex overflow-hidden">
+              <div className="w-full h-3 bg-ldna-grid flex overflow-hidden">
                 <div className="h-full bg-green-500/80 shadow-[0_0_10px_rgba(34,197,94,0.3)]" style={{ width: `${buyShare}%` }} />
                 <div className="h-full bg-ldna-accent/80 shadow-[0_0_10px_rgba(255,87,26,0.3)] flex-1" />
               </div>
@@ -479,20 +479,20 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
           {/* Section 07: Proof */}
           <section>
-            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex items-center gap-2">
-              <Database className="w-4 h-4" /> 07 / API Evidence Log
+            <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex items-center gap-2">
+              <Database className="w-4 h-4 shrink-0" /> 07 / API Evidence Log
             </h2>
-            <div className="bg-ldna-panel/80 border border-ldna-grid p-6 relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 w-16 h-16 bg-ldna-accent/10 rounded-full blur-xl" />
-              <div className="space-y-3 relative z-10">
+            <div className="bg-ldna-panel/80 border border-ldna-grid p-8 relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 w-20 h-20 bg-ldna-accent/10 rounded-full blur-xl" />
+              <div className="space-y-4 relative z-10">
                 {data.endpointProof.map((proof, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm group">
-                    <span className="font-mono text-ldna-muted group-hover:text-ldna-text transition-colors">{proof.endpoint}</span>
-                    <span className="font-mono bg-ldna-bg border border-ldna-grid group-hover:border-ldna-accent/30 px-2 py-0.5 text-xs text-ldna-accent">{proof.calls}x</span>
+                  <div key={i} className="flex items-center justify-between text-sm group gap-4">
+                    <span className="font-mono text-ldna-muted group-hover:text-ldna-text transition-colors truncate">{proof.endpoint}</span>
+                    <span className="font-mono bg-ldna-bg border border-ldna-grid group-hover:border-ldna-accent/30 px-2 py-1 text-xs text-ldna-accent shrink-0">{proof.calls}x</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-4 border-t border-ldna-grid text-xs text-ldna-text/50 text-center font-mono flex items-center justify-center gap-2">
+              <div className="mt-8 pt-5 border-t border-ldna-grid text-xs text-ldna-text/50 text-center font-mono flex items-center justify-center gap-2">
                 <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full" />
                 Verified via Birdeye API
               </div>

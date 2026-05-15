@@ -29,9 +29,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-ldna-bg text-ldna-text selection:bg-ldna-accent selection:text-white bg-dot-grid">
+      <body className="min-h-full flex flex-col bg-ldna-bg text-ldna-text selection:bg-ldna-accent selection:text-white bg-dot-grid overflow-x-hidden">
         <NavBar />
-        <main className="flex-1 flex flex-col bg-ldna-bg/80">
+        <main className="flex-1 flex flex-col bg-ldna-bg/80 w-full overflow-hidden">
           {children}
         </main>
         <Footer />

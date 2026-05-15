@@ -4,30 +4,30 @@ import { Search, ShieldAlert, BarChart3 } from "lucide-react";
 export function NavBar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-ldna-grid bg-ldna-bg/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 group">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-6 min-w-0">
+          <Link href="/" className="flex items-center gap-2 group shrink-0">
             <div className="w-6 h-6 bg-ldna-accent group-hover:bg-ldna-text transition-colors duration-200" />
-            <span className="font-mono font-bold text-xl tracking-tight">LaunchDNA</span>
+            <span className="font-mono font-bold text-xl tracking-tight hidden sm:block">LaunchDNA</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-ldna-muted ml-6">
-            <Link href="/analyze" className="hover:text-ldna-text transition-colors flex items-center gap-2">
-              <Search className="w-4 h-4" />
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-ldna-muted ml-6 min-w-0">
+            <Link href="/analyze" className="hover:text-ldna-text transition-colors flex items-center gap-2 truncate">
+              <Search className="w-4 h-4 shrink-0" />
               Analyzer
             </Link>
-            <Link href="/case/mock-token" className="hover:text-ldna-text transition-colors flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4" />
+            <Link href="/case/mock-token" className="hover:text-ldna-text transition-colors flex items-center gap-2 truncate">
+              <ShieldAlert className="w-4 h-4 shrink-0" />
               Birdeye Snapshot Case
             </Link>
-            <Link href="/proof" className="hover:text-ldna-text transition-colors flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
+            <Link href="/proof" className="hover:text-ldna-text transition-colors flex items-center gap-2 truncate">
+              <BarChart3 className="w-4 h-4 shrink-0" />
               Proof
             </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 shrink-0">
           <a
             href="https://github.com"
             target="_blank"
@@ -38,9 +38,9 @@ export function NavBar() {
           </a>
           <Link
             href="/analyze"
-            className="bg-ldna-accent text-ldna-bg px-4 py-2 text-sm font-bold hover:bg-ldna-text transition-colors uppercase tracking-wider"
+            className="bg-ldna-accent text-ldna-bg px-4 py-2 text-sm font-bold hover:bg-ldna-text transition-colors uppercase tracking-wider shrink-0"
           >
-            Analyze Token
+            Analyze
           </Link>
         </div>
       </div>
