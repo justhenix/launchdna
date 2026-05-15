@@ -58,11 +58,6 @@ export default async function ProofPage() {
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base mb-3">
             LaunchDNA logs real Birdeye requests used during token analysis. The current progress counters are stored durably and feed the case-file workflow.
           </p>
-          <div className="text-xs md:text-sm font-mono text-ldna-muted">
-            {proof.storageMode === "supabase"
-              ? "Durable progress is backed by Supabase."
-              : "Running in memory fallback mode. Supabase env vars are missing or unavailable."}
-          </div>
         </div>
       </div>
 

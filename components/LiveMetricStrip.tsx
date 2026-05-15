@@ -67,11 +67,6 @@ export default function LiveMetricStrip() {
             </div>
           ))}
         </div>
-        <div className="border-t border-ldna-grid bg-ldna-panel/70 px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-ldna-muted">
-          {data?.storageMode === "supabase"
-            ? "Progress stored in Supabase."
-            : "Memory proof mode. Add Supabase env vars for durable progress."}
-        </div>
       </div>
     </section>
   );
