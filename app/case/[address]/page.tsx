@@ -260,6 +260,11 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
               align="start"
             />
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-4 whitespace-nowrap">{data.classification.confidence}% CONF</span>
+            {data.dataMode === "partial" && (
+              <span className="font-mono text-[10px] text-ldna-warning border border-ldna-warning/30 bg-ldna-warning/10 px-2 py-1 uppercase tracking-widest whitespace-nowrap absolute -bottom-8 right-0 lg:right-auto">
+                Partial Evidence
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -318,6 +323,17 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                   <Area type="step" dataKey="price" stroke="var(--color-ldna-accent)" fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
+              {data.dataMode === "partial" && data.chart.every(point => point.price === 1 && point.volume === 0) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-ldna-panel/80 backdrop-blur-sm z-10 p-6 text-center">
+                  <div className="border border-ldna-warning/30 bg-ldna-bg/90 p-6 max-w-sm">
+                    <AlertTriangle className="w-8 h-8 text-ldna-warning mx-auto mb-4" />
+                    <div className="text-sm font-mono text-ldna-warning mb-2 uppercase tracking-widest font-bold">Chart Unavailable</div>
+                    <div className="text-xs font-mono text-ldna-muted leading-relaxed">
+                      OHLCV replay unavailable. Trade and wallet evidence still available.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 

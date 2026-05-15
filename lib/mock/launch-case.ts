@@ -83,7 +83,7 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
     };
   }),
   timeline: [
-    { time: "0m", label: "Sample Window Opened", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
+    { time: "0m", label: "Analysis Window Opened", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
     { time: "4m", label: "Early Buy Compression", detail: "Initial swap burst pushed volume above baseline.", severity: "warning" },
     { time: "9m", label: "First-Hour Price Peak", detail: "Price reached a local high before cooling.", severity: "neutral" },
     { time: "22m", label: "Sell Pressure", detail: "Sell flow overtook buys and slowed momentum.", severity: "warning" },

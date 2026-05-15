@@ -466,7 +466,11 @@ function summaryFor(archetype: LaunchArchetype, metrics: LaunchCase["metrics"], 
     return `Launch shows ${quality.hasOhlcvData ? "observed/proxy" : "insufficient"} volume shock evidence, ${formatPercent(metrics.sellPressure)} sell pressure, and ${quality.hasOhlcvData ? "observed" : "insufficient"} price weakness evidence.`;
   }
 
-  return `Available data shows smoother price action, ${quality.hasHolderShareData ? "lower holder concentration" : "unavailable holder concentration"}, and ${quality.hasTradeData ? "observed" : "insufficient"} buy/sell balance compared with sniper or liquidity-shock patterns.`;
+  if (!quality.hasHolderShareData) {
+    return `Holder concentration is unavailable. Available data shows ${quality.hasTradeData ? "observed" : "insufficient"} buy/sell balance compared with sniper or liquidity-shock patterns.`;
+  }
+
+  return `Available data shows smoother price action, lower holder concentration, and ${quality.hasTradeData ? "observed" : "insufficient"} buy/sell balance compared with sniper or liquidity-shock patterns.`;
 }
 
 function dominantArchetype(scores: LaunchCase["scores"]): LaunchArchetype {
@@ -641,7 +645,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     )),
   };
 
-  const archetype = dominantArchetype(scores);
+  let archetype = dominantArchetype(scores);
   const quality = {
     hasHolderShareData,
     hasTradeData: tradeMetrics.hasTradeData,
@@ -652,7 +656,24 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     ? 95
     : dataQuality >= 2
       ? 75
-      : 65;
+      : 55;
+  const rawSniperSwarm = scores.sniperSwarm;
+  const rawLiquidityMirage = scores.liquidityMirage;
+  const rawOrganicGrind = scores.organicGrind;
+
+  if (metrics.earlyBuyCompression >= 80 && flaggedHolderCount >= 3) {
+    scores.organicGrind = Math.min(scores.organicGrind, Math.max(scores.sniperSwarm, scores.liquidityMirage) - 1);
+  }
+
+  if (metrics.earlyBuyCompression >= 80 && tradeMetrics.hasTradeData) {
+    scores.sniperSwarm = Math.max(scores.sniperSwarm, scores.organicGrind + 1);
+  }
+
+  archetype = dominantArchetype(scores);
+  let summary = summaryFor(archetype, metrics, quality);
+  if (dataQuality < 2) {
+    summary = `Partial evidence only: ${summary}`;
+  }
   const confidence = clamp(Math.max(scores.sniperSwarm, scores.liquidityMirage, scores.organicGrind), 55, confidenceCap);
   const securityFlagsDetected = flaggedHolderCount > 0 ? "Detected" : "None";
   const holderEvidenceText = hasHolderShareData
@@ -683,7 +704,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     classification: {
       archetype,
       confidence: Math.round(confidence),
-      summary: summaryFor(archetype, metrics, quality),
+      summary,
     },
     evidence: [
       {
@@ -727,8 +748,8 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     timeline: [
       {
         time: "0m",
-        label: "Sample Window Opened",
-        detail: "Birdeye sample window opened for launch classification.",
+        label: "Analysis Window Opened",
+        detail: "Birdeye analysis window opened for launch classification.",
         severity: "neutral",
       },
       {
