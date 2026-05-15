@@ -68,6 +68,11 @@ export type LaunchCase = {
     tag?: string;
   }[];
 
+  labeledWallets?: {
+    address: string;
+    tag: string;
+  }[];
+
   trades: {
     buys: number;
     sells: number;

@@ -99,14 +99,14 @@ export default function AnalyzePage() {
           Forensic Analyzer
           <span className="inline-block w-2.5 h-2.5 bg-ldna-accent animate-pulse rounded-full" />
         </h1>
-        <p className="text-ldna-muted text-lg">Input a Solana token address to generate a comprehensive launch classification report.</p>
+        <p className="text-ldna-muted text-lg">Paste a token from pump.fun, Trojan, Birdeye, or any Solana feed to explain its launch.</p>
       </div>
 
       {/* Input Section */}
       <form onSubmit={handleAnalyze} className="bg-ldna-panel/80 backdrop-blur-md border border-ldna-grid p-8 md:p-10 mb-16 relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
         <div className="absolute -top-3 left-8 bg-ldna-bg px-3 py-0.5 font-mono text-xs text-ldna-accent uppercase font-bold tracking-wider border border-ldna-grid flex items-center gap-2">
           <span className="w-1.5 h-1.5 bg-ldna-accent rounded-full" />
-          Query Target
+          Target Address
         </div>
         
         <div className="flex flex-col md:flex-row gap-4">
@@ -114,7 +114,7 @@ export default function AnalyzePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ldna-muted group-focus-within:text-ldna-accent transition-colors" />
             <input 
               type="text" 
-              placeholder="Enter Solana Token Address..." 
+              placeholder="Paste Solana Token Address..." 
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               disabled={isAnalyzing}
@@ -129,7 +129,7 @@ export default function AnalyzePage() {
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Analyzing...
+                Processing...
               </>
             ) : (
               "Generate Case File"
@@ -138,7 +138,7 @@ export default function AnalyzePage() {
         </div>
         <div className="mt-4 flex items-center gap-2 text-xs font-mono text-ldna-muted">
           <Activity className="w-3.5 h-3.5" />
-          <span>Only evaluating tokens launched within the last 24 hours.</span>
+          <span>A forensic explanation layer powered by Birdeye.</span>
         </div>
       </form>
 

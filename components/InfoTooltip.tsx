@@ -13,7 +13,7 @@ export const TOOLTIP_COPY: Record<string, string> = {
   "Early Buy Compression":
     "How much first-hour buying happened in the first few minutes. High values can indicate rushed or coordinated entry.",
   "Top 10 Holder Concentration":
-    "Estimated share controlled by the ten largest holders in the available Birdeye sample.",
+    "Estimated share controlled by the ten largest holders with meaningful share data in the available Birdeye sample.",
   "Trade Pressure":
     "Whether observed trades lean toward buys, sells, or balanced activity.",
   "Liquidity Shock Proxy":
@@ -23,7 +23,7 @@ export const TOOLTIP_COPY: Record<string, string> = {
   "OHLCV":
     "Open, High, Low, Close, and Volume candles used to replay price and volume over time.",
   "Holder Concentration":
-    "How much supply appears concentrated in top holders. High concentration can increase launch risk.",
+    "Supply concentration uses holder share data only. Tagged wallets without share data are shown separately.",
   "Partial Evidence":
     "Some Birdeye endpoints returned incomplete data, usually because the token is very new.",
   "Birdeye Snapshot":
@@ -51,10 +51,10 @@ export function InfoTooltip({ label, text, align = "center", className }: InfoTo
         : "left-1/2 -translate-x-1/2";
 
   return (
-    <span className={cn("relative inline-flex", className)}>
+    <span className={cn("relative inline-flex items-center", className)}>
       <button
         type="button"
-        aria-label={label}
+        aria-label={`Information about ${label}`}
         aria-describedby={open ? id : undefined}
         aria-expanded={open}
         onMouseEnter={() => setOpen(true)}
@@ -72,16 +72,16 @@ export function InfoTooltip({ label, text, align = "center", className }: InfoTo
             event.currentTarget.blur();
           }
         }}
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-ldna-grid bg-ldna-bg/80 text-[10px] font-mono text-ldna-muted transition-colors hover:text-ldna-text focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ldna-accent/40"
+        className="cursor-help decoration-ldna-muted/50 decoration-dotted underline underline-offset-4 hover:decoration-ldna-accent transition-colors focus-visible:outline-none focus-visible:decoration-ldna-accent"
       >
-        <span className="sr-only">{label}</span>
-        <span aria-hidden="true">i</span>
+        <span className="sr-only">Information about {label}: </span>
+        {label}
       </button>
       <span
         id={id}
         role="tooltip"
         className={cn(
-          "absolute top-full z-50 mt-2 w-64 border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)]",
+          "absolute top-full z-50 mt-2 w-64 border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)] normal-case tracking-normal",
           "transition-opacity",
           alignClass,
           open ? "opacity-100" : "pointer-events-none opacity-0",
@@ -102,10 +102,11 @@ type TooltipLabelProps = {
 export function TooltipLabel({ label, className, align = "center" }: TooltipLabelProps) {
   const text = TOOLTIP_COPY[label];
 
+  if (!text) {
+    return <span className={className}>{label}</span>;
+  }
+
   return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
-      <span>{label}</span>
-      {text ? <InfoTooltip label={label} text={text} align={align} /> : null}
-    </span>
+    <InfoTooltip label={label} text={text} align={align} className={className} />
   );
 }

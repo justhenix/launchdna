@@ -51,9 +51,9 @@ function createPartialFallbackCase(
       },
       {
         label: "Top 10 Holder Concentration",
-        value: "Insufficient",
+        value: "Unavailable",
         severity: "neutral",
-        explanation: "Holder rows not yet indexed; proxy not available.",
+        explanation: "Holder share unavailable in current Birdeye sample.",
       },
       {
         label: "Trade Pressure",
@@ -208,6 +208,8 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
 
   const tradeTotal = data.trades.buys + data.trades.sells;
   const buyShare = tradeTotal > 0 ? Math.min(100, Math.max(0, (data.trades.buys / tradeTotal) * 100)) : 50;
+  const topHolders = data.holders.filter((holder) => holder.percentage > 0.01);
+  const labeledWallets = data.labeledWallets ?? [];
 
   return (
     <div className="flex-1 flex flex-col container mx-auto px-4 py-8 max-w-6xl relative">
@@ -237,7 +239,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             {data.dataMode === "mock" && (
               <TooltipLabel
                 label="Birdeye Snapshot"
-                className="text-[10px] border border-ldna-accent/30 px-1.5 py-0.5 bg-ldna-accent/5 text-ldna-accent ml-2 uppercase tracking-widest"
+                className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-2 uppercase tracking-widest"
                 align="end"
               />
             )}
@@ -263,8 +265,9 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       </div>
 
       {data.dataMode === "mock" && (
-        <div className="mb-8 -mt-4 text-xs font-mono text-ldna-muted">
-          Captured from Birdeye data for stable judging and demo playback.
+        <div className="mb-8 -mt-4 text-xs font-mono text-ldna-muted flex items-center gap-2">
+          <Database className="w-3.5 h-3.5" />
+          <span>Captured from Birdeye data for stable judging and demo playback.</span>
         </div>
       )}
 
@@ -393,22 +396,47 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             </h2>
             <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
               <div className="space-y-4">
-                {data.holders.length === 0 ? (
-                  <div className="text-xs font-mono text-ldna-muted">Insufficient holder data yet. Birdeye indexing in progress.</div>
+                {topHolders.length === 0 ? (
+                  <div className="text-xs font-mono text-ldna-muted leading-relaxed uppercase tracking-tight">
+                    <div>Holder share unavailable in current Birdeye sample.</div>
+                    <div className="mt-2 text-ldna-muted/70">Wallet labels may still be available separately.</div>
+                  </div>
                 ) : (
-                  data.holders.map((holder, i) => (
+                  topHolders
+                    .map((holder, i) => (
                     <div key={i} className="flex items-center justify-between group">
                       <div className="flex flex-col">
                         <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{holder.address.slice(0,6)}...{holder.address.slice(-4)}</span>
                         {holder.tag && <span className="text-[10px] font-mono uppercase text-ldna-accent mt-0.5">{holder.tag}</span>}
                       </div>
-                      <div className="font-mono font-bold text-ldna-text">{Math.min(100, Math.max(0, holder.percentage))}%</div>
+                      <div className="font-mono font-bold text-ldna-text">
+                        {Math.min(100, holder.percentage).toFixed(2)}%
+                      </div>
                     </div>
                   ))
                 )}
               </div>
             </div>
           </section>
+
+          {labeledWallets.length > 0 && (
+            <section>
+              <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-4 border-b border-ldna-grid pb-2 flex justify-between items-end">
+                <span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4" /> Labeled Wallets</span>
+                <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-1.5 py-0.5 border border-ldna-accent/20">SOURCE: BIRDEYE</span>
+              </h2>
+              <div className="bg-ldna-panel/80 border border-ldna-grid p-6">
+                <div className="space-y-4">
+                  {labeledWallets.map((wallet, i) => (
+                    <div key={`${wallet.address}-${i}`} className="flex items-center justify-between gap-4 group">
+                      <span className="font-mono text-sm text-ldna-text/90 group-hover:text-ldna-accent transition-colors">{wallet.address.slice(0,6)}...{wallet.address.slice(-4)}</span>
+                      <span className="text-[10px] font-mono uppercase text-ldna-accent text-right">{wallet.tag}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Section 06: Trade Pressure */}
           <section>

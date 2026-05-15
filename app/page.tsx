@@ -31,16 +31,20 @@ export default function Home() {
               <span className="text-ldna-muted">Leaves Evidence.</span>
             </h1>
             <p className="text-lg md:text-xl text-ldna-muted mb-12 max-w-2xl mx-auto leading-relaxed">
-              LaunchDNA replays the first hour of new Solana tokens and classifies launch behavior using Birdeye market, trade, holder, security, and OHLCV data.
+              Find tokens anywhere. Paste the address here.<br />
+              LaunchDNA explains the launch using Birdeye data.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link href="/analyze" className="w-full sm:w-auto px-8 py-4 bg-ldna-accent text-ldna-bg font-bold uppercase tracking-wider hover:bg-ldna-text hover:shadow-[0_0_20px_rgba(255,87,26,0.4)] transition-all duration-300 flex items-center justify-center gap-2 group">
                 Analyze Token <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/case/mock-token" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
-                View Snapshot Case <ShieldAlert className="w-5 h-5" />
+                View Birdeye Snapshot <ShieldAlert className="w-5 h-5" />
               </Link>
             </div>
+            <p className="mt-8 text-xs font-mono text-ldna-muted uppercase tracking-widest opacity-60">
+              Not a faster scanner. A forensic explanation layer powered by Birdeye.
+            </p>
           </div>
         </div>
       </section>
@@ -118,7 +122,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
             <h2 className="text-3xl font-serif">Birdeye Snapshot Case</h2>
             <Link href="/case/mock-token" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
-              Open Snapshot Report <ArrowRight className="w-4 h-4" />
+              Open Birdeye Snapshot <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           
