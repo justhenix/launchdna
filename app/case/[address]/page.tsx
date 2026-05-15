@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { LaunchCase } from "@/types/launch-case";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
-import { fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
+import { fallbackEndpointProof } from "@/lib/proof/endpointProof";
 import { sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
 import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -238,7 +238,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <span className="text-ldna-muted break-all">{data.token.address}</span>
             {data.dataMode === "mock" && (
               <TooltipLabel
-                label="Birdeye Snapshot"
+                label="Case Files"
                 className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-2 uppercase tracking-widest shrink-0"
                 align="start"
               />

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { BirdeyeClient } from "@/lib/birdeye/client";
 import { BIRDEYE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { dedupeListings, isReadableTokenText, sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
-import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
+import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/endpointProof";
 import type { NewListingFeedItem, NewListingsResponse } from "@/types/launch-case";
 
 export const dynamic = "force-dynamic";

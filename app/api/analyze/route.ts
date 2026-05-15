@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { BirdeyeClient, type BirdeyeRequestResult } from "@/lib/birdeye/client";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { classifyLaunch, createMockLaunchCase } from "@/lib/classifier/classifyLaunch";
-import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/apiCallLogger";
+import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/endpointProof";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

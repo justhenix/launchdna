@@ -1,21 +1,24 @@
-import type { BirdeyeEndpoint } from "@/lib/birdeye/endpoints";
+import "server-only";
+
 import { BIRDEYE_ENDPOINTS } from "@/lib/birdeye/endpoints";
-import type { LaunchCase } from "@/types/launch-case";
-
-type EndpointStatus = NonNullable<LaunchCase["endpointProof"][number]["status"]>;
-
-export type EndpointCallResult = {
-  endpoint: BirdeyeEndpoint;
-  calls: number;
-  status: EndpointStatus;
-};
+import { buildEndpointProof, type EndpointCallResult } from "@/lib/proof/endpointProof";
 
 export type BirdeyeCallLogEntry = EndpointCallResult & {
   at: string;
   durationMs?: number;
   statusCode?: number;
   tokenAddress?: string;
+  caseId?: string;
   error?: string;
+};
+
+export type DurableApiCallStats = {
+  totalBirdeyeCalls: number;
+  uniqueEndpoints: number;
+  tokensAnalyzed: number;
+  caseFilesGenerated: number;
+  generatedAt: string;
+  storageMode: "supabase" | "memory";
 };
 
 type ApiLogGlobal = typeof globalThis & {
@@ -25,6 +28,7 @@ type ApiLogGlobal = typeof globalThis & {
 function getStore() {
   const store = globalThis as ApiLogGlobal;
   if (!store.__launchDnaBirdeyeCalls) {
+    // Memory store is fallback only. Supabase is durable proof store.
     store.__launchDnaBirdeyeCalls = [];
   }
 
@@ -32,63 +36,15 @@ function getStore() {
 }
 
 export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
-  getStore().push({
+  const fullEntry = {
     ...entry,
     at: new Date().toISOString(),
-  });
-}
+  };
 
-function mergeStatus(current: EndpointStatus, next: EndpointStatus): EndpointStatus {
-  if (current === "failed" || next === "failed") {
-    return "failed";
-  }
-
-  if (current === "ok" || next === "ok") {
-    return "ok";
-  }
-
-  return "fallback";
-}
-
-export function buildEndpointProof(
-  results: EndpointCallResult[],
-  endpointOrder: readonly BirdeyeEndpoint[] = [],
-): LaunchCase["endpointProof"] {
-  const byEndpoint = new Map<BirdeyeEndpoint, EndpointCallResult>();
-
-  for (const endpoint of endpointOrder) {
-    byEndpoint.set(endpoint, {
-      endpoint,
-      calls: 0,
-      status: "fallback",
-    });
-  }
-
-  for (const result of results) {
-    const existing = byEndpoint.get(result.endpoint);
-    if (!existing) {
-      byEndpoint.set(result.endpoint, { ...result });
-      continue;
-    }
-
-    byEndpoint.set(result.endpoint, {
-      endpoint: result.endpoint,
-      calls: existing.calls + result.calls,
-      status: mergeStatus(existing.status, result.status),
-    });
-  }
-
-  return Array.from(byEndpoint.values());
-}
-
-export function fallbackEndpointProof(
-  endpointOrder: readonly BirdeyeEndpoint[],
-): LaunchCase["endpointProof"] {
-  return endpointOrder.map((endpoint) => ({
-    endpoint,
-    calls: 0,
-    status: "fallback",
-  }));
+  getStore().push(fullEntry);
+  void import("@/lib/proof/supabaseProofStore")
+    .then(({ persistBirdeyeCall }) => persistBirdeyeCall(fullEntry))
+    .catch(() => undefined);
 }
 
 export function getApiCallStats() {
@@ -112,4 +68,43 @@ export function getApiCallStats() {
     endpointProof,
     entries,
   };
+}
+
+function buildMemoryStats(): DurableApiCallStats {
+  const entries = getStore();
+  const endpointSet = new Set<string>();
+  const tokenSet = new Set<string>();
+  const caseSet = new Set<string>();
+
+  for (const entry of entries) {
+    endpointSet.add(entry.endpoint);
+
+    if (entry.tokenAddress?.trim()) {
+      tokenSet.add(entry.tokenAddress.trim());
+    }
+
+    const caseKey = entry.caseId?.trim() || entry.tokenAddress?.trim();
+    if (caseKey) {
+      caseSet.add(caseKey);
+    }
+  }
+
+  return {
+    totalBirdeyeCalls: entries.reduce((total, entry) => total + entry.calls, 0),
+    uniqueEndpoints: endpointSet.size,
+    tokensAnalyzed: tokenSet.size,
+    caseFilesGenerated: caseSet.size,
+    generatedAt: new Date().toISOString(),
+    storageMode: "memory",
+  };
+}
+
+export async function getDurableApiCallStats(): Promise<DurableApiCallStats> {
+  const { getSupabaseProofStats } = await import("@/lib/proof/supabaseProofStore");
+  const supabaseStats = await getSupabaseProofStats();
+  if (supabaseStats) {
+    return supabaseStats;
+  }
+
+  return buildMemoryStats();
 }

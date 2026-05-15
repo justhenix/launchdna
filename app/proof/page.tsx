@@ -1,24 +1,18 @@
 import { Database, Server, Cpu, FileText, CheckCircle2, Activity } from "lucide-react";
 
-import { getApiCallStats } from "@/lib/proof/apiCallLogger";
+import { getDurableApiCallStats } from "@/lib/proof/apiCallLogger";
 
 export const dynamic = "force-dynamic";
 
-export default function ProofPage() {
-  const proof = getApiCallStats();
-  const minimumTargetReached = proof.totalCalls >= 50;
+export default async function ProofPage() {
+  const proof = await getDurableApiCallStats();
 
   const stats = [
-    { label: "BIRDEYE API CALLS", value: proof.totalCalls.toLocaleString(), color: "text-ldna-text" },
-    { label: "ENDPOINTS HIT", value: proof.endpointsIntegrated.length.toString(), color: "text-ldna-text" },
-    { label: "LAUNCH TYPES", value: "3", color: "text-ldna-text" },
-    { label: "QUALIFIER", value: minimumTargetReached ? "READY" : "NEED 50+", color: "text-ldna-text" },
+    { label: "BIRDEYE CALLS", value: proof.totalBirdeyeCalls.toLocaleString(), color: "text-ldna-text" },
+    { label: "ENDPOINTS HIT", value: proof.uniqueEndpoints.toString(), color: "text-ldna-text" },
+    { label: "TOKENS ANALYZED", value: proof.tokensAnalyzed.toString(), color: "text-ldna-text" },
+    { label: "CASE FILES", value: proof.caseFilesGenerated.toString(), color: "text-ldna-text" },
   ];
-
-  const callMessage =
-    proof.totalCalls < 50
-      ? "Analyze more real tokens before submission to pass the 50+ API call target."
-      : "The 50+ Birdeye API call target has been reached for this session.";
 
   const endpoints = [
     { path: "/defi/v3/token/txs", purpose: "Identify early buy compression and trade pressure" },
@@ -36,7 +30,7 @@ export default function ProofPage() {
       <div className="mb-16 text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-serif mb-6 tracking-tight">Technical Architecture</h1>
         <p className="text-ldna-muted text-lg leading-relaxed">
-          LaunchDNA is a forensic launch classifier for Solana tokens. 
+          LaunchDNA is a forensic launch classifier for Solana tokens.
           This page outlines our system architecture and data utilization strategy.
         </p>
       </div>
@@ -59,13 +53,15 @@ export default function ProofPage() {
         <Activity className="w-6 h-6 text-ldna-accent shrink-0 mt-1 md:animate-pulse" />
         <div className="relative z-10">
           <h3 className="text-xl font-bold text-ldna-accent mb-3 flex items-center gap-3">
-            Live Birdeye API Proof
+            Live Birdeye Progress
           </h3>
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base mb-3">
-            LaunchDNA logs real Birdeye requests used during token analysis. These calls feed the LaunchCase classifier and produce forensic first-hour case files.
+            LaunchDNA logs real Birdeye requests used during token analysis. The current progress counters are stored durably and feed the case-file workflow.
           </p>
           <div className="text-xs md:text-sm font-mono text-ldna-muted">
-            {callMessage}
+            {proof.storageMode === "supabase"
+              ? "Durable progress is backed by Supabase."
+              : "Running in memory fallback mode. Supabase env vars are missing or unavailable."}
           </div>
         </div>
       </div>

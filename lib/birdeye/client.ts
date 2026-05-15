@@ -6,10 +6,10 @@ import {
   type BirdeyeEndpoint,
 } from "@/lib/birdeye/endpoints";
 import {
-  fallbackEndpointProof,
-  logBirdeyeCall,
   type EndpointCallResult,
-} from "@/lib/proof/apiCallLogger";
+  fallbackEndpointProof,
+} from "@/lib/proof/endpointProof";
+import { logBirdeyeCall } from "@/lib/proof/apiCallLogger";
 
 type JsonRecord = Record<string, unknown>;
 

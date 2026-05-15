@@ -172,7 +172,7 @@ export default function Home() {
             {[
               { icon: Activity, title: "New Listings", desc: "Monitor Solana" },
               { icon: Database, title: "Birdeye API", desc: "Fetch Raw Data" },
-              { icon: Search, title: "Snapshot Store", desc: "First Hour Replay" },
+              { icon: Search, title: "Case Store", desc: "First Hour Replay" },
               { icon: Cpu, title: "Classifier Engine", desc: "Score & Tag" },
               { icon: ShieldAlert, title: "Case File", desc: "Generate Report" }
             ].map((step, i, arr) => (

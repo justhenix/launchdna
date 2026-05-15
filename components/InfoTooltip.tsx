@@ -26,8 +26,8 @@ export const TOOLTIP_COPY: Record<string, string> = {
     "Supply concentration uses holder share data only. Tagged wallets without share data are shown separately.",
   "Partial Evidence":
     "Some Birdeye endpoints returned incomplete data, usually because the token is very new.",
-  "Birdeye Snapshot":
-    "A stable case file generated from Birdeye-derived data so users can review the findings even when live tokens are incomplete.",
+  "Case Files":
+    "A stable case file generated from Birdeye-derived data so users can review findings even when live token evidence is incomplete.",
 };
 
 type TooltipAlign = "start" | "center" | "end";
