@@ -1,131 +1,69 @@
 # LaunchDNA
 
-Every Token Launch Leaves Evidence.
+**Every Token Launch Leaves Evidence.**
 
-[Live Demo Placeholder](#) | [GitHub Repository Placeholder](#) | [X Thread Placeholder](#)
+LaunchDNA is a forensic case-file generator for Solana tokens. Paste a token address, and it uses Birdeye data to explain the token's launch behavior or current evidence window.
 
-LaunchDNA is a post-discovery forensic explanation layer for Solana tokens. Find tokens anywhere, paste the address here, and LaunchDNA explains the launch using Birdeye data. It replays launch behavior or a recent evidence window to generate a forensic case file based on evidence, not hype.
+Live Demo: https://launchdna.vercel.app  
+Repository: https://github.com/justhenix/launchdna  
+Built for: Birdeye Data 4-Week BIP Competition, Sprint 4
 
 ## What It Does
 
-LaunchDNA classifies Solana token launch behavior from available Birdeye evidence. Instead of acting as a faster scanner for trading like Trojan or pump.fun, it acts as an investigation lab. Users paste a Solana token address, and the system evaluates market, trade, holder, security, and OHLCV data to classify the behavior into specific archetypes.
+LaunchDNA turns Birdeye token, trade, holder, security, and OHLCV data into forensic reports.
 
-## Why It Is Different
+It classifies observed behavior into:
 
-Token radars show movement. LaunchDNA shows evidence. It avoids generic metrics and focuses on explainable heuristics. Every classification is backed by concrete data points, resulting in Case Files rather than a standard crypto UI.
+- **Sniper Swarm**: compressed early buys, suspicious wallet activity, and aggressive launch movement.
+- **Liquidity Mirage**: volume spikes, weak follow-through, sell pressure, and unstable behavior.
+- **Organic Grind**: smoother movement, healthier distribution, and more balanced trade pressure.
 
-## Core User Flow
+## Core Flow
 
-1. User pastes a Solana token address or selects a new listing.
-2. The application fetches data from multiple Birdeye API endpoints.
-3. The system normalizes the data into a unified `LaunchCase` object.
-4. The heuristic classifier processes the `LaunchCase`.
-5. The UI presents a detailed forensic case file with evidence cards and an evidence-window replay chart.
-6. The user can view the API proof page verifying the data origin and endpoint calls.
-
-## Launch Archetypes
-
-Tokens are classified into one of three archetypes based on forensic evidence:
-
-*   **Sniper Swarm**: High holder concentration, fast evidence-window price spikes, compressed early buys, and suspicious trade pressure.
-*   **Liquidity Mirage**: Early volume spikes followed by weak post-spike structure, increasing sell pressure, and unstable price to liquidity ratios.
-*   **Organic Grind**: Smoother price movements, healthier token distribution, lower top holder concentration, and balanced buy/sell pressure.
-
-## Architecture
-
-New listing or pasted token -> Birdeye API -> Normalized `LaunchCase` -> Heuristic Classifier -> Forensic Case File
-
-### Data Contract
-
-The `LaunchCase` object is the core data contract powering both the UI and backend. The application is built to handle partial evidence gracefully. Very new tokens may have incomplete Birdeye history; LaunchDNA processes what is available and returns a partial case safely without failing.
-
-### Classification Logic
-
-The classifier uses explainable heuristics. It relies on strict thresholds and evidence scoring based on the `LaunchCase` data, ensuring the results are transparent and avoid black-box ML models.
+```txt
+Token address
+-> Birdeye API
+-> LaunchCase object
+-> Heuristic classifier
+-> Forensic case file
+```
 
 ## Birdeye Endpoints Used
 
-LaunchDNA integrates deeply with the Birdeye API to source forensic data:
-
-*   `/defi/v2/tokens/new_listing`
-*   `/defi/token_overview`
-*   `/defi/token_security`
-*   `/defi/v3/ohlcv`
-*   `/defi/v3/token/txs`
-*   `/defi/v3/token/holder`
-*   `/token/v1/holder-positions`
+- `/defi/v2/tokens/new_listing`
+- `/defi/token_overview`
+- `/defi/token_security`
+- `/defi/v3/ohlcv`
+- `/defi/v3/token/txs`
+- `/defi/v3/token/holder`
+- `/token/v1/holder-positions`
 
 ## Tech Stack
 
-*   Next.js
-*   TypeScript
-*   Tailwind CSS
-*   Recharts
-*   Birdeye API
+- Next.js
+- TypeScript
+- Tailwind CSS
+- Recharts
+- Birdeye API
+- Vercel
 
 ## Local Setup
-
-Ensure you have Bun installed.
 
 ```bash
 bun install
 cp .env.example .env
 ```
 
-Set your environment variables in `.env`:
-```env
-BIRDEYE_API_KEY=your_api_key_here
-```
-
-### Vercel Environment Variables
-
-Set these in Vercel before demo deployment:
-
 ```env
 BIRDEYE_API_KEY=your_birdeye_api_key
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-# or SUPABASE_SECRET_KEY=your_secret_key
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEY` must stay server-side only.
-Run `supabase/setup-supabase.sql` in the Supabase SQL editor to create `launchdna_api_calls` and `case_files`.
-
-### Before Submission Proof Checklist
-
-1. Set Vercel env vars:
-   - `BIRDEYE_API_KEY`
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-2. Run Supabase SQL setup.
-3. Redeploy Vercel after env changes.
-4. Open `/api/debug/supabase`.
-5. Analyze 10-15 real Solana tokens.
-6. Open `/api/debug/flush-proof`.
-7. Open `/proof`.
-8. Confirm:
-   - storage mode is Supabase Durable Store
-   - Birdeye calls > 50
-   - endpoints hit >= 6
-   - tokens analyzed >= 5
-   - case files >= 3
-
-Run the application:
 ```bash
 bun dev
 bun run lint
 bun run build
 ```
 
-## Screenshots
+## Disclaimer
 
-*   [Landing Page Screenshot Placeholder]
-*   [Analyzer Interface Screenshot Placeholder]
-*   [Forensic Case File Screenshot Placeholder]
-*   [API Proof Page Screenshot Placeholder]
-
-## Purpose
-
-LaunchDNA is a forensic analysis tool designed to help users understand the mechanics of Solana token launches.
-
-*Disclaimer: LaunchDNA is a forensic analysis tool. It does not predict profits and is not financial advice.*
+LaunchDNA is a forensic analysis tool. It does not execute trades, provide financial advice, or predict profits.
