@@ -154,6 +154,7 @@ export async function POST(request: Request) {
 
     const endpointProof = buildEndpointProof(results, BIRDEYE_CASE_ENDPOINTS);
     const liveCount = results.filter((result) => result.ok).length;
+    const hasCoreLiveEvidence = overview?.ok && (ohlcv?.ok || txs?.ok);
 
     if (timedOut()) {
       return NextResponse.json(classifyLaunch({
@@ -198,7 +199,7 @@ export async function POST(request: Request) {
       holders: holders?.data,
       holderPositions: holderPositions?.data,
       endpointProof,
-      dataMode: liveCount === results.length ? "live" : "partial",
+      dataMode: hasCoreLiveEvidence ? "live" : "partial",
     }));
   } catch {
     if (address === "mock-token" || !isLikelySolanaAddress(address)) {

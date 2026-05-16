@@ -111,6 +111,7 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
     { endpoint: "/defi/v3/token/holder", calls: 1, status: "ok" },
     { endpoint: "/token/v1/holder-positions", calls: 1, status: "ok" },
   ],
+  evidenceQuality: { status: "complete", missing: [] },
   generatedAt: new Date().toISOString(),
   dataMode: "mock",
 };

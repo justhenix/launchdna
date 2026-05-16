@@ -40,7 +40,7 @@ function createPartialFallbackCase(
     classification: {
       archetype: "Organic Grind",
       confidence: 60,
-      summary: "Partial evidence available. This token may be too new for complete Birdeye history.",
+      summary: "Limited evidence available. Some Birdeye datasets were unavailable for this token or analysis window.",
     },
     evidence: [
       {
@@ -81,8 +81,8 @@ function createPartialFallbackCase(
     timeline: [
       {
         time: "0m",
-        label: "Partial Evidence",
-        detail: "Token too new; Birdeye history still indexing.",
+        label: "Limited Evidence",
+        detail: "Some Birdeye datasets were unavailable for this analysis window.",
         severity: "neutral",
       },
     ],
@@ -93,6 +93,10 @@ function createPartialFallbackCase(
       netPressure: "balanced",
     },
     endpointProof,
+    evidenceQuality: {
+      status: "limited",
+      missing: ["holder share", "trade rows", "OHLCV replay"],
+    },
     generatedAt: new Date().toISOString(),
     dataMode: "partial",
   };
@@ -227,10 +231,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       {data.dataMode === "partial" && (
         <div className="mb-12 border border-ldna-warning/30 bg-ldna-panel/60 px-8 py-6">
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-ldna-warning uppercase tracking-widest">
-            <TooltipLabel label="Partial Evidence" align="start" />
+            <TooltipLabel label="Limited Evidence" align="start" />
           </div>
           <div className="mt-3 text-sm font-mono text-ldna-warning/80 leading-relaxed">
-            Some Birdeye endpoints returned incomplete data, usually because the token is very new.
+            Limited Evidence. Some Birdeye datasets were unavailable for this token or analysis window. LaunchDNA used available evidence.
           </div>
         </div>
       )}
@@ -286,7 +290,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-4 whitespace-nowrap">{data.classification.confidence}% CONF</span>
             {data.dataMode === "partial" && (
               <span className="font-mono text-[10px] text-ldna-warning border border-ldna-warning/30 bg-ldna-warning/10 px-2 py-1 uppercase tracking-widest whitespace-nowrap absolute -bottom-8 right-0 md:hidden">
-                Partial Evidence
+                Limited Evidence
               </span>
             )}
           </div>
@@ -320,7 +324,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           {/* Section 02: Replay Chart */}
           <section>
             <h2 className="text-xs font-mono font-bold text-ldna-muted uppercase tracking-widest mb-6 border-b border-ldna-grid pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
-              <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / First-Hour Replay</span>
+              <span className="flex items-center gap-2"><BarChart3 className="w-4 h-4" /> 02 / Evidence Window Replay</span>
               <span className="text-[10px] bg-ldna-accent/10 text-ldna-accent px-2 py-1 border border-ldna-accent/20 flex items-center gap-1.5">
                 <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="start" />
               </span>

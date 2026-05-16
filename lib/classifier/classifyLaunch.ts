@@ -669,7 +669,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   archetype = dominantArchetype(scores);
   let summary = summaryFor(archetype, metrics, quality);
   if (dataQuality < 2) {
-    summary = `Partial evidence only: ${summary}`;
+    summary = `Limited evidence only: ${summary}`;
   }
   const confidence = clamp(Math.max(scores.sniperSwarm, scores.liquidityMirage, scores.organicGrind), 55, confidenceCap);
   const securityFlagsDetected = flaggedHolderCount > 0 ? "Detected" : "None";
@@ -682,6 +682,11 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
   const ohlcvEvidenceText = chartResult.hasOhlcvData
     ? "Proxy combines observed OHLCV movement, early volume, and trade pressure."
     : "Insufficient OHLCV rows; neutral chart fallback used and confidence capped.";
+
+  const missingSources = [];
+  if (!quality.hasHolderShareData) missingSources.push("holder share");
+  if (!quality.hasTradeData) missingSources.push("trade rows");
+  if (!quality.hasOhlcvData) missingSources.push("OHLCV replay");
 
   const overviewName = firstString(overview, ["name", "tokenName"]);
   const overviewSymbol = firstString(overview, ["symbol", "tokenSymbol"]);
@@ -782,7 +787,11 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
       netPressure: netPressure(tradeMetrics.buys, tradeMetrics.sells),
     },
     endpointProof: cloneEndpointProof(input.endpointProof),
+    evidenceQuality: {
+      status: dataQuality === 3 ? "complete" : "limited",
+      missing: missingSources,
+    },
     generatedAt: new Date().toISOString(),
-    dataMode: input.dataMode === "live" && dataQuality === 3 ? "live" : input.dataMode === "mock" ? "mock" : "partial",
+    dataMode: input.dataMode === "live" && dataQuality >= 2 ? "live" : input.dataMode === "mock" ? "mock" : "partial",
   };
 }

@@ -87,6 +87,11 @@ export type LaunchCase = {
     status?: "ok" | "fallback" | "failed";
   }[];
 
+  evidenceQuality: {
+    status: "complete" | "limited";
+    missing: string[];
+  };
+
   generatedAt: string;
   dataMode: "live" | "mock" | "partial";
 };
