@@ -1,66 +1,8 @@
 import { Database, Server, Cpu, FileText, CheckCircle2, Activity } from "lucide-react";
-import { headers } from "next/headers";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
-type ProofStats = {
-  totalBirdeyeCalls: number;
-  uniqueEndpoints: number;
-  tokensAnalyzed: number;
-  caseFilesGenerated: number;
-  generatedAt: string;
-  storageMode: "supabase" | "local";
-  storageLabel?: string;
-};
-
-const LOCAL_PROOF_FALLBACK: ProofStats = {
-  totalBirdeyeCalls: 0,
-  uniqueEndpoints: 0,
-  tokensAnalyzed: 0,
-  caseFilesGenerated: 0,
-  generatedAt: new Date().toISOString(),
-  storageMode: "local",
-  storageLabel: "Local fallback store",
-};
-
-async function getProofStatsFromApi(): Promise<ProofStats> {
-  const headerStore = await headers();
-  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
-  if (!host) {
-    return LOCAL_PROOF_FALLBACK;
-  }
-
-  const proto = headerStore.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
-  const response = await fetch(`${proto}://${host}/api/proof`, { cache: "no-store" }).catch(() => null);
-  if (!response?.ok) {
-    return LOCAL_PROOF_FALLBACK;
-  }
-
-  return response.json() as Promise<ProofStats>;
-}
-
-export default async function ProofPage() {
-  const proof = await getProofStatsFromApi();
-
-  const storageBadge = proof.storageMode === "supabase"
-    ? {
-        label: "Supabase Durable Store",
-        className: "text-ldna-accent border-ldna-accent/30 bg-ldna-accent/10",
-        dot: "bg-ldna-accent",
-      }
-    : {
-        label: "Local Fallback Store",
-        className: "text-ldna-warning border-ldna-warning/30 bg-ldna-warning/10",
-        dot: "bg-ldna-warning",
-      };
-
-  const stats = [
-    { label: "BIRDEYE CALLS", value: proof.totalBirdeyeCalls.toLocaleString(), color: "text-ldna-text" },
-    { label: "ENDPOINTS HIT", value: proof.uniqueEndpoints.toString(), color: "text-ldna-text" },
-    { label: "TOKENS ANALYZED", value: proof.tokensAnalyzed.toString(), color: "text-ldna-text" },
-    { label: "CASE FILES", value: proof.caseFilesGenerated.toString(), color: "text-ldna-text" },
-  ];
-
+export default function ProofPage() {
   const endpoints = [
     { path: "/defi/v3/token/txs", purpose: "Identify early buy compression and trade pressure" },
     { path: "/defi/v3/token/holder", purpose: "Calculate top holder concentration" },
@@ -76,43 +18,9 @@ export default async function ProofPage() {
 
       <div className="mb-16 text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-serif mb-6 tracking-tight">Technical Architecture</h1>
-        <div className={`inline-flex items-center gap-2 border px-3 py-1 text-xs font-mono uppercase tracking-widest mb-5 ${storageBadge.className}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${storageBadge.dot}`} />
-          {storageBadge.label}
-        </div>
         <p className="text-ldna-muted text-lg leading-relaxed">
-          LaunchDNA is a forensic launch classifier for Solana tokens.
-          This page outlines our system architecture and data utilization strategy.
+          LaunchDNA uses Birdeye token, trade, holder, security, and OHLCV data to generate forensic case files.
         </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="max-w-4xl mx-auto w-full bg-ldna-grid border border-ldna-grid mb-16 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-ldna-panel/80 p-8 text-center hover:bg-ldna-panel transition-colors flex flex-col items-center justify-center">
-              <div className={`text-4xl font-mono font-bold mb-4 ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs font-mono text-ldna-muted uppercase tracking-widest">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Note about Snapshot Data */}
-      <div className="bg-ldna-accent/10 border border-ldna-accent/30 p-6 md:p-8 mb-16 flex flex-col md:flex-row items-start gap-4 md:gap-6 relative overflow-hidden group hover:border-ldna-accent/50 transition-colors">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-ldna-accent/10 blur-3xl rounded-full" />
-        <Activity className="w-6 h-6 text-ldna-accent shrink-0 mt-1 md:animate-pulse" />
-        <div className="relative z-10">
-          <h3 className="text-xl font-bold text-ldna-accent mb-3 flex items-center gap-3">
-            Live Birdeye Progress
-          </h3>
-          <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base mb-3">
-            LaunchDNA logs real Birdeye requests used during token analysis. The current progress counters are read through the proof API route.
-          </p>
-          <div className="text-xs font-mono uppercase tracking-widest text-ldna-muted">
-            Storage: {proof.storageMode === "supabase" ? "Supabase durable store" : "Local fallback - Supabase unavailable"}
-          </div>
-        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12 md:gap-16 mb-16">

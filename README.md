@@ -91,6 +91,25 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEY` must stay server-side only.
 Run `supabase/setup-supabase.sql` in the Supabase SQL editor to create `launchdna_api_calls` and `case_files`.
 
+### Before Submission Proof Checklist
+
+1. Set Vercel env vars:
+   - `BIRDEYE_API_KEY`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+2. Run Supabase SQL setup.
+3. Redeploy Vercel after env changes.
+4. Open `/api/debug/supabase`.
+5. Analyze 10-15 real Solana tokens.
+6. Open `/api/debug/flush-proof`.
+7. Open `/proof`.
+8. Confirm:
+   - storage mode is Supabase Durable Store
+   - Birdeye calls > 50
+   - endpoints hit >= 6
+   - tokens analyzed >= 5
+   - case files >= 3
+
 Run the application:
 ```bash
 bun dev

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { BirdeyeClient, type BirdeyeRequestResult } from "@/lib/birdeye/client";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { classifyLaunch, createMockLaunchCase } from "@/lib/classifier/classifyLaunch";
+import { flushBirdeyeCallLogs } from "@/lib/proof/apiCallLogger";
 import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/endpointProof";
 import { hasSupabaseProofStore, persistCaseFile, supabaseErrorForClient } from "@/lib/proof/supabaseProofStore";
 import type { LaunchCase } from "@/types/launch-case";
@@ -108,6 +109,10 @@ function isLikelySolanaAddress(address: string) {
 }
 
 async function jsonCase(launchCase: LaunchCase) {
+  let headers: HeadersInit | undefined;
+
+  await flushBirdeyeCallLogs();
+
   if (!hasSupabaseProofStore()) {
     return NextResponse.json(launchCase);
   }
@@ -117,15 +122,13 @@ async function jsonCase(launchCase: LaunchCase) {
   } catch (error) {
     console.error("Supabase case_files insert failed:", error);
     if (process.env.NODE_ENV !== "production") {
-      return NextResponse.json(launchCase, {
-        headers: {
-          "x-launchdna-supabase-error": JSON.stringify(supabaseErrorForClient(error)),
-        },
-      });
+      headers = {
+        "x-launchdna-supabase-error": JSON.stringify(supabaseErrorForClient(error)),
+      };
     }
   }
 
-  return NextResponse.json(launchCase);
+  return NextResponse.json(launchCase, headers ? { headers } : undefined);
 }
 
 export async function POST(request: Request) {

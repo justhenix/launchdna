@@ -97,8 +97,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Live Metric Strip */}
-      <LiveMetricStrip />
+      {/* Static Integration Strip */}
+      <section className="bg-ldna-grid border-b border-ldna-grid">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
+            {[
+              { label: "BIRDEYE ENDPOINTS", value: "7" },
+              { label: "CHAIN", value: "SOLANA" },
+              { label: "CLASSIFIERS", value: "3" },
+              { label: "MODE", value: "EVIDENCE" },
+            ].map((metric) => (
+              <div key={metric.label} className="p-8 text-center bg-ldna-panel/90 backdrop-blur-md hover:bg-ldna-panel transition-colors">
+                <div className="text-3xl md:text-4xl font-mono font-bold text-ldna-text mb-3">
+                  {metric.value}
+                </div>
+                <div className="text-xs uppercase tracking-widest text-ldna-muted font-bold">
+                  {metric.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Problem Comparison */}
       <section className="py-24 border-b border-ldna-grid bg-ldna-bg">
