@@ -4,10 +4,10 @@
 
 LaunchDNA is a forensic case-file generator for Solana tokens. Paste a token address, and it uses Birdeye data to explain the token's launch behavior or current evidence window.
 
-Live Demo: https://launchdna.vercel.app  
-Repository: https://github.com/justhenix/launchdna
-X post: https://x.com/heni0x/status/2055497104983032163?s=20
-Built for: Birdeye Data 4-Week BIP Competition, Sprint 4
+- Live Demo: https://launchdna.vercel.app  
+- Repository: https://github.com/justhenix/launchdna
+- X post: https://x.com/heni0x/status/2055497104983032163?s=20
+- Built for: Birdeye Data 4-Week BIP Competition, Sprint 4
 
 ## What It Does
 
