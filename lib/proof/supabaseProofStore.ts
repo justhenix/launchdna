@@ -26,6 +26,7 @@ type SupabaseCaseFileRow = {
 };
 
 const API_CALL_TABLE = "launchdna_api_calls";
+const CASE_FILES_TABLE = "case_files";
 
 function normalizeText(value?: string | null) {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined;
@@ -73,7 +74,7 @@ export async function persistCaseFile(launchCase: LaunchCase): Promise<void> {
     updated_at: new Date().toISOString(),
   };
   const query = new URLSearchParams({ on_conflict: "case_id" });
-  const result = await supabaseRestRequest<undefined>("case_files", {
+  const result = await supabaseRestRequest<undefined>(CASE_FILES_TABLE, {
     method: "POST",
     query,
     body: payload,
@@ -86,6 +87,10 @@ export async function persistCaseFile(launchCase: LaunchCase): Promise<void> {
 }
 
 export async function getSupabaseProofStats(): Promise<SupabaseProofStats | null> {
+  if (!hasSupabaseProofStore()) {
+    return null;
+  }
+
   const params = new URLSearchParams({
     select: "endpoint,token_address,case_id,calls",
     limit: "10000",
@@ -149,7 +154,7 @@ async function getCaseFilesGenerated(fallbackCaseSet: Set<string>) {
     limit: "10000",
     order: "created_at.desc",
   });
-  const result = await supabaseRestRequest<SupabaseCaseFileRow[]>("case_files", {
+  const result = await supabaseRestRequest<SupabaseCaseFileRow[]>(CASE_FILES_TABLE, {
     query: params,
   });
 

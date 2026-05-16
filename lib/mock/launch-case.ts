@@ -12,7 +12,7 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
   classification: {
     archetype: "Liquidity Mirage",
     confidence: 76,
-    summary: "Launch shows early volume lift with softer liquidity follow-through and moderate sell pressure in the first hour.",
+    summary: "Launch shows early volume lift with softer liquidity follow-through and moderate sell pressure in the evidence window.",
   },
   evidence: [
     {
@@ -31,7 +31,7 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
       label: "Trade Pressure",
       value: "SELL",
       severity: "warning",
-      explanation: "Observed sells outweighed buys across the first-hour trade sample.",
+      explanation: "Observed sells outweighed buys across the evidence-window trade sample.",
     },
     {
       label: "Liquidity Shock Proxy",
@@ -85,9 +85,9 @@ export const MOCK_LAUNCH_CASE: LaunchCase = {
   timeline: [
     { time: "0m", label: "Analysis Window Opened", detail: "Birdeye snapshot window opened for the launch replay.", severity: "neutral" },
     { time: "4m", label: "Early Buy Compression", detail: "Initial swap burst pushed volume above baseline.", severity: "warning" },
-    { time: "9m", label: "First-Hour Price Peak", detail: "Price reached a local high before cooling.", severity: "neutral" },
+    { time: "9m", label: "Evidence Window Price Peak", detail: "Price reached a local high before cooling.", severity: "neutral" },
     { time: "22m", label: "Sell Pressure", detail: "Sell flow overtook buys and slowed momentum.", severity: "warning" },
-    { time: "60m", label: "First-Hour Closeout", detail: "Price and volume stabilized into a narrower range.", severity: "neutral" },
+    { time: "60m", label: "Evidence Window Closeout", detail: "Price and volume stabilized into a narrower range.", severity: "neutral" },
   ],
   holders: [
     { address: "9bGqv6XwY7tV2hK8mR3pZ5sQ1cN4dF6jT8uE2aH7yP3", percentage: 9.8 },

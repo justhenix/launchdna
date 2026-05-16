@@ -4,7 +4,7 @@ import { BirdeyeClient, type BirdeyeRequestResult } from "@/lib/birdeye/client";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { classifyLaunch, createMockLaunchCase } from "@/lib/classifier/classifyLaunch";
 import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/endpointProof";
-import { persistCaseFile, supabaseErrorForClient } from "@/lib/proof/supabaseProofStore";
+import { hasSupabaseProofStore, persistCaseFile, supabaseErrorForClient } from "@/lib/proof/supabaseProofStore";
 import type { LaunchCase } from "@/types/launch-case";
 
 export const dynamic = "force-dynamic";
@@ -108,6 +108,10 @@ function isLikelySolanaAddress(address: string) {
 }
 
 async function jsonCase(launchCase: LaunchCase) {
+  if (!hasSupabaseProofStore()) {
+    return NextResponse.json(launchCase);
+  }
+
   try {
     await persistCaseFile(launchCase);
   } catch (error) {

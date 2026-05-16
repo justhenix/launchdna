@@ -127,7 +127,7 @@ export function InfoTooltip({ label, text, align: initialAlign = "center", class
         id={id}
         role="tooltip"
         className={cn(
-          "absolute top-full z-[100] mt-2 w-max max-w-[min(320px,calc(100vw-2rem))] border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)] normal-case tracking-normal break-words whitespace-normal pointer-events-none",
+          "absolute top-full z-100 mt-2 w-max max-w-[min(320px,calc(100vw-2rem))] border border-ldna-grid bg-ldna-panel px-3 py-2 text-xs text-ldna-text shadow-[0_0_20px_rgba(0,0,0,0.45)] normal-case tracking-normal wrap-break-word whitespace-normal pointer-events-none",
           "transition-opacity duration-200",
           alignClass,
           open ? "opacity-100 pointer-events-auto" : "opacity-0",

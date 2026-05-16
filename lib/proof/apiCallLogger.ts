@@ -43,7 +43,13 @@ export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
 
   getStore().push(fullEntry);
   void import("@/lib/proof/supabaseProofStore")
-    .then(({ persistBirdeyeCall }) => persistBirdeyeCall(fullEntry))
+    .then(({ hasSupabaseProofStore, persistBirdeyeCall }) => {
+      if (!hasSupabaseProofStore()) {
+        return undefined;
+      }
+
+      return persistBirdeyeCall(fullEntry);
+    })
     .catch((error) => {
       console.error("Supabase launchdna_api_calls insert failed:", error);
     });
@@ -102,7 +108,11 @@ function buildMemoryStats(): DurableApiCallStats {
 }
 
 export async function getDurableApiCallStats(): Promise<DurableApiCallStats> {
-  const { getSupabaseProofStats } = await import("@/lib/proof/supabaseProofStore");
+  const { getSupabaseProofStats, hasSupabaseProofStore } = await import("@/lib/proof/supabaseProofStore");
+  if (!hasSupabaseProofStore()) {
+    return buildMemoryStats();
+  }
+
   const supabaseStats = await getSupabaseProofStats();
   if (supabaseStats) {
     return supabaseStats;

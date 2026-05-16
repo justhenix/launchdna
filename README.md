@@ -4,11 +4,11 @@ Every Token Launch Leaves Evidence.
 
 [Live Demo Placeholder](#) | [GitHub Repository Placeholder](#) | [X Thread Placeholder](#)
 
-LaunchDNA is a post-discovery forensic explanation layer for Solana tokens. Find tokens anywhere, paste the address here, and LaunchDNA explains the launch using Birdeye data. It replays the first hour of a token's lifecycle to generate a forensic case file based on evidence, not hype.
+LaunchDNA is a post-discovery forensic explanation layer for Solana tokens. Find tokens anywhere, paste the address here, and LaunchDNA explains the launch using Birdeye data. It replays launch behavior or a recent evidence window to generate a forensic case file based on evidence, not hype.
 
 ## What It Does
 
-LaunchDNA classifies the first hour of new Solana token launches. Instead of acting as a faster scanner for trading like Trojan or pump.fun, it acts as an investigation lab. Users paste a Solana token address, and the system evaluates market, trade, holder, security, and OHLCV data to classify the launch behavior into specific archetypes.
+LaunchDNA classifies Solana token launch behavior from available Birdeye evidence. Instead of acting as a faster scanner for trading like Trojan or pump.fun, it acts as an investigation lab. Users paste a Solana token address, and the system evaluates market, trade, holder, security, and OHLCV data to classify the behavior into specific archetypes.
 
 ## Why It Is Different
 
@@ -20,14 +20,14 @@ Token radars show movement. LaunchDNA shows evidence. It avoids generic metrics 
 2. The application fetches data from multiple Birdeye API endpoints.
 3. The system normalizes the data into a unified `LaunchCase` object.
 4. The heuristic classifier processes the `LaunchCase`.
-5. The UI presents a detailed forensic case file with evidence cards and a first-hour replay chart.
+5. The UI presents a detailed forensic case file with evidence cards and an evidence-window replay chart.
 6. The user can view the API proof page verifying the data origin and endpoint calls.
 
 ## Launch Archetypes
 
 Tokens are classified into one of three archetypes based on forensic evidence:
 
-*   **Sniper Swarm**: High holder concentration, fast first-hour price spikes, compressed early buys, and suspicious trade pressure.
+*   **Sniper Swarm**: High holder concentration, fast evidence-window price spikes, compressed early buys, and suspicious trade pressure.
 *   **Liquidity Mirage**: Early volume spikes followed by weak post-spike structure, increasing sell pressure, and unstable price to liquidity ratios.
 *   **Organic Grind**: Smoother price movements, healthier token distribution, lower top holder concentration, and balanced buy/sell pressure.
 
@@ -76,6 +76,20 @@ Set your environment variables in `.env`:
 ```env
 BIRDEYE_API_KEY=your_api_key_here
 ```
+
+### Vercel Environment Variables
+
+Set these in Vercel before demo deployment:
+
+```env
+BIRDEYE_API_KEY=your_birdeye_api_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# or SUPABASE_SECRET_KEY=your_secret_key
+```
+
+`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEY` must stay server-side only.
+Run `supabase/setup-supabase.sql` in the Supabase SQL editor to create `launchdna_api_calls` and `case_files`.
 
 Run the application:
 ```bash
