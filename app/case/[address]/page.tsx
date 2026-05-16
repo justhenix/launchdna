@@ -225,7 +225,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
   const missingEvidence = (data.evidenceQuality?.missing ?? []).map((item) => item.trim()).filter(Boolean);
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-7xl relative overflow-x-hidden">
+    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-7xl w-full relative overflow-x-hidden">
       <div className="fixed inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay -z-10" />
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
 
@@ -249,7 +249,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 pb-10 border-b border-ldna-grid relative gap-6">
         <div className="absolute top-0 right-0 w-1/3 h-px bg-linear-to-r from-transparent via-ldna-accent/50 to-transparent" />
         
-        <div className="flex-1 min-w-0 w-full">
+        <div className="flex-1 min-w-0 w-full max-w-full">
           <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-5 flex flex-wrap items-center gap-2">
             <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse shrink-0" />
             <span className="shrink-0">{"// CASE FILE"}</span>
@@ -278,12 +278,12 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
               />
             )}
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-3 flex flex-wrap items-center gap-4 tracking-tight">
-            <span className="break-words max-w-full">{data.token.name}</span>
-            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-3 py-1.5 bg-ldna-panel/50 shrink-0 break-all max-w-full">${data.token.symbol}</span>
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-3 flex flex-wrap items-center gap-4 tracking-tight min-w-0">
+            <span className="min-w-0 wrap-break-word max-w-full">{data.token.name}</span>
+            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-3 py-1.5 bg-ldna-panel/50 min-w-0 break-all max-w-full">${data.token.symbol}</span>
           </h1>
         </div>
-        <div className="mt-6 lg:mt-0 text-left lg:text-right shrink-0 w-full lg:w-auto">
+        <div className="mt-6 lg:mt-0 text-left lg:text-right shrink-0 w-full lg:w-auto min-w-0">
           <div className="text-xs font-mono text-ldna-muted mb-3 uppercase tracking-widest">Classification Result</div>
           <div className="flex md:inline-flex w-full md:w-auto flex-wrap items-center justify-between md:justify-start gap-4 px-6 py-4 md:py-3 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative group">
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
@@ -310,10 +310,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
         </div>
       )}
 
-      <div className="grid lg:grid-cols-12 gap-12 xl:gap-16">
+      <div className="grid lg:grid-cols-12 gap-12 xl:gap-16 min-w-0">
         
         {/* Main Column */}
-        <div className="lg:col-span-8 space-y-16">
+        <div className="lg:col-span-8 space-y-16 min-w-0">
           
           {/* Section 01: Summary */}
           <section>
@@ -335,7 +335,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                 <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="start" />
               </span>
             </h2>
-            <div className="bg-ldna-panel/60 border border-ldna-grid p-8 h-[400px] relative group">
+            <div className="bg-ldna-panel/60 border border-ldna-grid p-4 md:p-8 h-[260px] md:h-[400px] relative group overflow-hidden">
               {/* Scanline effect */}
               <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-size-[100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
               <ResponsiveContainer width="100%" height="100%">
@@ -437,7 +437,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
         </div>
 
         {/* Sidebar Column */}
-        <div className="lg:col-span-4 space-y-12">
+        <div className="lg:col-span-4 space-y-12 min-w-0">
           
           {/* Section 05: Holder Concentration */}
           <section>

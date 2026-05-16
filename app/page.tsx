@@ -2,32 +2,57 @@ import Link from "next/link";
 import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2, ChevronDown } from "lucide-react";
 import { TooltipLabel } from "@/components/InfoTooltip";
 import SpotlightGrid from "@/components/SpotlightGrid";
-import LiveMetricStrip from "@/components/LiveMetricStrip";
+
+type FeaturedCase = {
+  title: string;
+  symbol: string;
+  category: string;
+  address: string;
+  note: string;
+  href: string;
+};
+
+// TODO: replace with strongest analyzed live case before submission.
+const CURATED_FEATURED_CASES: FeaturedCase[] = [
+  {
+    title: "dogwifhat",
+    symbol: "WIF",
+    category: "Sniper Swarm candidate",
+    address: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    note: "High-volume meme launch candidate for sniper-compression review.",
+    href: "/case/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm?name=dogwifhat&symbol=WIF",
+  },
+  {
+    title: "Bonk",
+    symbol: "BONK",
+    category: "Liquidity Mirage candidate",
+    address: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    note: "Meme liquidity candidate for volume-shock and follow-through review.",
+    href: "/case/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263?name=Bonk&symbol=BONK",
+  },
+  {
+    title: "Jupiter",
+    symbol: "JUP",
+    category: "Organic Grind benchmark",
+    address: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+    note: "Established Solana token benchmark for healthier market-structure reads.",
+    href: "/case/JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN?name=Jupiter&symbol=JUP",
+  },
+];
+
+const DEMO_FALLBACK_CASES: FeaturedCase[] = [
+  {
+    title: "Demo Fallback",
+    symbol: "DEMO",
+    category: "Demo Fallback",
+    address: "mock-token",
+    note: "Local mock case only. Replace with analyzed live cases before judging.",
+    href: "/case/mock-token?name=Demo%20Fallback&symbol=DEMO",
+  },
+];
 
 export default function Home() {
-  const featuredCases = [
-    {
-      title: "Wrapped SOL",
-      symbol: "wSOL",
-      address: "So11111111111111111111111111111111111111112",
-      note: "Baseline liquidity reference for Solana-native flow.",
-      href: "/case/So11111111111111111111111111111111111111112?name=Wrapped%20SOL&symbol=wSOL",
-    },
-    {
-      title: "USD Coin",
-      symbol: "USDC",
-      address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      note: "Stable liquidity benchmark for risk-normalized reads.",
-      href: "/case/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?name=USD%20Coin&symbol=USDC",
-    },
-    {
-      title: "Case Files",
-      symbol: "SNAP",
-      address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",
-      note: "Built-in forensic sample with full evidence coverage.",
-      href: "/case/mock-token?name=Case%20Files&symbol=SNAP",
-    },
-  ];
+  const featuredCases = CURATED_FEATURED_CASES.length > 0 ? CURATED_FEATURED_CASES : DEMO_FALLBACK_CASES;
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -59,7 +84,7 @@ export default function Home() {
               <Link href="/analyze" className="w-full sm:w-auto px-8 py-4 bg-ldna-accent text-ldna-bg font-bold uppercase tracking-wider hover:bg-ldna-text hover:shadow-[0_0_20px_rgba(255,87,26,0.4)] transition-all duration-300 flex items-center justify-center gap-2 group">
                 Analyze Token <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link href="/case/mock-token" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
+              <Link href="#featured-cases" className="w-full sm:w-auto px-8 py-4 border border-ldna-grid hover:border-ldna-text bg-ldna-panel/50 backdrop-blur-sm font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2">
                 View Case Files
               </Link>
             </div>
@@ -71,8 +96,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Live Metric Strip */}
-      <LiveMetricStrip />
+      {/* Static Integration Strip */}
+      <section className="bg-ldna-grid border-b border-ldna-grid">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px">
+            {[
+              { label: "BIRDEYE ENDPOINTS", value: "7" },
+              { label: "CHAIN", value: "SOLANA" },
+              { label: "CLASSIFIERS", value: "3" },
+              { label: "MODE", value: "EVIDENCE" },
+            ].map((metric) => (
+              <div key={metric.label} className="p-8 text-center bg-ldna-panel/90 backdrop-blur-md hover:bg-ldna-panel transition-colors">
+                <div className="text-3xl md:text-4xl font-mono font-bold text-ldna-text mb-3">
+                  {metric.value}
+                </div>
+                <div className="text-xs uppercase tracking-widest text-ldna-muted font-bold">
+                  {metric.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Problem Comparison */}
       <section className="py-24 border-b border-ldna-grid bg-ldna-bg">
@@ -106,7 +151,7 @@ export default function Home() {
               </div>
               <ul className="space-y-6 relative z-10">
                 {[
-                  "First-hour launch replay",
+                  "Evidence window replay",
                   "Early sniper wallet discovery",
                   "Suspicious liquidity patterns",
                   "Evidence-backed classification"
@@ -127,8 +172,8 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
             <h2 className="text-3xl font-serif">Case Files</h2>
-            <Link href="/case/mock-token" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
-              Open Case File <ArrowRight className="w-4 h-4" />
+            <Link href="#featured-cases" className="text-sm font-mono text-ldna-accent hover:text-ldna-text transition-colors flex items-center gap-2 uppercase tracking-wider">
+              View Curated Cases <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           
@@ -161,7 +206,7 @@ export default function Home() {
               {[
                 { label: "Early Buy Compression", text: "22% of buys in first 3 mins", color: "text-ldna-muted", metric: "22%" },
                 { label: "Top 10 Holder Concentration", text: "27.4% held by top wallets", color: "text-ldna-muted", metric: "27%" },
-                { label: "Trade Pressure", text: "Sells outweighed buys in first hour", color: "text-ldna-accent", metric: "SELL" },
+                { label: "Trade Pressure", text: "Sells outweighed buys in evidence window", color: "text-ldna-accent", metric: "SELL" },
                 { label: "Liquidity Shock Proxy", text: "Volume spike with weak follow-through", color: "text-ldna-warning", metric: "58%" },
               ].map((evidence, i) => (
                 <div key={i} className="p-5 bg-ldna-panel/40 border border-ldna-grid/50 hover:bg-ldna-panel/80 transition-colors flex flex-col justify-between">
@@ -185,11 +230,11 @@ export default function Home() {
       </section>
 
       {/* Featured Case Files */}
-      <section className="py-24 border-b border-ldna-grid bg-ldna-bg">
+      <section id="featured-cases" className="py-24 border-b border-ldna-grid bg-ldna-bg scroll-mt-24">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
             <h2 className="text-3xl font-serif">Featured Case Files</h2>
-            <div className="text-xs font-mono text-ldna-muted uppercase tracking-widest">Curated replays</div>
+            <div className="text-xs font-mono text-ldna-muted uppercase tracking-widest">Curated candidates</div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -208,6 +253,7 @@ export default function Home() {
                     <div className="text-[10px] font-mono text-ldna-muted uppercase tracking-widest truncate">{item.address}</div>
                   </div>
                 </div>
+                <div className="text-[10px] font-mono text-ldna-accent uppercase tracking-widest">{item.category}</div>
                 <div className="text-sm text-ldna-muted leading-relaxed">{item.note}</div>
                 <div className="text-xs font-mono text-ldna-accent uppercase tracking-widest">Open case file</div>
               </Link>
@@ -228,7 +274,7 @@ export default function Home() {
             {[
               { icon: Activity, title: "New Listings", desc: "Monitor Solana" },
               { icon: Database, title: "Birdeye API", desc: "Fetch Raw Data" },
-              { icon: Search, title: "Case Store", desc: "First Hour Replay" },
+              { icon: Search, title: "Case Store", desc: "Evidence Replay" },
               { icon: Cpu, title: "Classifier Engine", desc: "Score & Tag" },
               { icon: ShieldAlert, title: "Case File", desc: "Generate Report" }
             ].map((step, i, arr) => (

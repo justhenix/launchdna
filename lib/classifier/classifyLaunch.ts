@@ -714,7 +714,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
         value: formatPercent(metrics.earlyBuyCompression),
         severity: severityFromScore(metrics.earlyBuyCompression),
         explanation: tradeMetrics.hasTimedTrades
-          ? `${formatPercent(metrics.earlyBuyCompression)} of observed first-hour buys clustered into the first 3 minutes.`
+          ? `${formatPercent(metrics.earlyBuyCompression)} of observed evidence-window buys clustered into the first 3 minutes.`
           : "Insufficient Birdeye timestamps; neutral early-buy compression used.",
       },
       {
@@ -764,7 +764,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
       },
       {
         time: `${priceMetrics.peakIndex + 1}m`,
-        label: "First-Hour Price Peak",
+        label: "Evidence Window Price Peak",
         detail: chartResult.hasOhlcvData
           ? `${formatPercent(priceMetrics.fastSpike)} observed fast spike score before post-peak action.`
           : "Insufficient OHLCV data for peak replay.",
@@ -772,7 +772,7 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
       },
       {
         time: "60m",
-        label: "First-Hour Closeout",
+        label: "Evidence Window Closeout",
         detail: `${round(metrics.priceChange1h, 2)}% price change with ${formatPercent(metrics.sellPressure)} observed/proxy sell pressure.`,
         severity: metrics.priceChange1h < -25 ? "danger" : metrics.priceChange1h < 0 ? "warning" : "good",
       },

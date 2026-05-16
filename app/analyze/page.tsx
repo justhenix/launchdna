@@ -155,7 +155,7 @@ export default function AnalyzePage() {
           </div>
         </div>
 
-        <div className="grid gap-4 min-h-100">
+        <div className="grid gap-4 min-h-[400px]">
           {isLoadingFeed ? (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-24 bg-ldna-panel/20 border border-ldna-grid animate-pulse" />

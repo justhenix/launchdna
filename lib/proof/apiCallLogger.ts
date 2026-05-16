@@ -23,6 +23,7 @@ export type DurableApiCallStats = {
 
 type ApiLogGlobal = typeof globalThis & {
   __launchDnaBirdeyeCalls?: BirdeyeCallLogEntry[];
+  __launchDnaPendingPersists?: Promise<void>[];
 };
 
 function getStore() {
@@ -35,6 +36,15 @@ function getStore() {
   return store.__launchDnaBirdeyeCalls;
 }
 
+function getPendingPersists(): Promise<void>[] {
+  const store = globalThis as ApiLogGlobal;
+  if (!store.__launchDnaPendingPersists) {
+    store.__launchDnaPendingPersists = [];
+  }
+
+  return store.__launchDnaPendingPersists;
+}
+
 export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
   const fullEntry = {
     ...entry,
@@ -42,11 +52,33 @@ export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
   };
 
   getStore().push(fullEntry);
-  void import("@/lib/proof/supabaseProofStore")
-    .then(({ persistBirdeyeCall }) => persistBirdeyeCall(fullEntry))
+  const persistPromise: Promise<void> = import("@/lib/proof/supabaseProofStore")
+    .then(({ hasSupabaseProofStore, persistBirdeyeCall }) => {
+      if (!hasSupabaseProofStore()) {
+        return;
+      }
+
+      return persistBirdeyeCall(fullEntry);
+    })
     .catch((error) => {
       console.error("Supabase launchdna_api_calls insert failed:", error);
     });
+
+  getPendingPersists().push(persistPromise);
+}
+
+export async function flushBirdeyeCallLogs(): Promise<void> {
+  const pending = getPendingPersists();
+  const batch = pending.splice(0, pending.length);
+  if (batch.length === 0) {
+    return;
+  }
+
+  try {
+    await Promise.allSettled(batch);
+  } catch (error) {
+    console.error("Birdeye call log flush failed:", error);
+  }
 }
 
 export function getApiCallStats() {
@@ -102,7 +134,11 @@ function buildMemoryStats(): DurableApiCallStats {
 }
 
 export async function getDurableApiCallStats(): Promise<DurableApiCallStats> {
-  const { getSupabaseProofStats } = await import("@/lib/proof/supabaseProofStore");
+  const { getSupabaseProofStats, hasSupabaseProofStore } = await import("@/lib/proof/supabaseProofStore");
+  if (!hasSupabaseProofStore()) {
+    return buildMemoryStats();
+  }
+
   const supabaseStats = await getSupabaseProofStats();
   if (supabaseStats) {
     return supabaseStats;
