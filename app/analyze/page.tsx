@@ -91,7 +91,7 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-5xl relative">
+    <div className="flex-1 flex flex-col container mx-auto px-6 md:px-10 py-8 md:py-12 max-w-5xl relative">
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-10 mix-blend-screen" />
 
       <div className="mb-12">

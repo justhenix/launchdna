@@ -5,7 +5,7 @@ import { Search, ShieldAlert, BarChart3 } from "lucide-react";
 export function NavBar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-ldna-grid bg-ldna-bg/80 backdrop-blur-md">
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      <div className="container mx-auto px-6 md:px-10 h-14 md:h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 min-w-0">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <Image

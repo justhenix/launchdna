@@ -657,9 +657,6 @@ export function classifyLaunch(input: ClassifyLaunchInput): LaunchCase {
     : dataQuality >= 2
       ? 75
       : 55;
-  const rawSniperSwarm = scores.sniperSwarm;
-  const rawLiquidityMirage = scores.liquidityMirage;
-  const rawOrganicGrind = scores.organicGrind;
 
   if (metrics.earlyBuyCompression >= 80 && flaggedHolderCount >= 3) {
     scores.organicGrind = Math.min(scores.organicGrind, Math.max(scores.sniperSwarm, scores.liquidityMirage) - 1);

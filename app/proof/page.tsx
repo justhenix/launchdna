@@ -24,7 +24,7 @@ export default async function ProofPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-5xl relative">
+    <div className="flex-1 flex flex-col container mx-auto px-6 md:px-10 py-8 md:py-12 max-w-5xl relative">
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-10 mix-blend-screen" />
 
       <div className="mb-16 text-center max-w-3xl mx-auto">

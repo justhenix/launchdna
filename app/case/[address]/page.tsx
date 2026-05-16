@@ -5,7 +5,7 @@ import { LaunchCase } from "@/types/launch-case";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { fallbackEndpointProof } from "@/lib/proof/endpointProof";
 import { sanitizeTokenName, sanitizeTokenSymbol } from "@/lib/listings";
-import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ShieldAlert, BarChart3, Clock, Database, Crosshair, Users, Activity, Loader2, RefreshCw, Copy, Check } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -108,6 +108,14 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
   const [data, setData] = useState<LaunchCase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!data?.token.address) return;
+    navigator.clipboard.writeText(data.token.address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -231,27 +239,43 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 pb-10 border-b border-ldna-grid relative gap-6">
         <div className="absolute top-0 right-0 w-1/3 h-px bg-linear-to-r from-transparent via-ldna-accent/50 to-transparent" />
         
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-5 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse" />
-            <span>{"// CASE FILE"}</span>
-            <span className="text-ldna-muted break-all">{data.token.address}</span>
+        <div className="flex-1 min-w-0 w-full">
+          <div className="text-xs font-mono font-bold text-ldna-accent uppercase tracking-widest mb-5 flex flex-wrap items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-ldna-accent animate-pulse shrink-0" />
+            <span className="shrink-0">{"// CASE FILE"}</span>
+            <span className="text-ldna-muted break-all min-w-0">{data.token.address}</span>
+            <button 
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 px-2 py-0.5 bg-ldna-panel border border-ldna-grid text-ldna-muted hover:text-ldna-accent hover:border-ldna-accent/30 transition-all uppercase text-[10px] tracking-tighter shrink-0"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3 h-3 text-green-500" />
+                  <span className="text-green-500">COPIED</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>COPY</span>
+                </>
+              )}
+            </button>
             {data.dataMode === "mock" && (
               <TooltipLabel
                 label="Case Files"
-                className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-2 uppercase tracking-widest shrink-0"
+                className="text-[10px] border border-ldna-grid px-1.5 py-0.5 bg-ldna-panel text-ldna-muted ml-0 md:ml-2 uppercase tracking-widest shrink-0"
                 align="start"
               />
             )}
           </div>
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-3 flex flex-wrap items-center gap-4 tracking-tight">
             <span className="break-words max-w-full">{data.token.name}</span>
-            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-3 py-1.5 bg-ldna-panel/50 shrink-0">${data.token.symbol}</span>
+            <span className="text-2xl font-mono text-ldna-muted border border-ldna-grid px-3 py-1.5 bg-ldna-panel/50 shrink-0 break-all max-w-full">${data.token.symbol}</span>
           </h1>
         </div>
-        <div className="mt-4 lg:mt-0 text-left lg:text-right shrink-0">
+        <div className="mt-6 lg:mt-0 text-left lg:text-right shrink-0 w-full lg:w-auto">
           <div className="text-xs font-mono text-ldna-muted mb-3 uppercase tracking-widest">Classification Result</div>
-          <div className="inline-flex flex-wrap items-center gap-4 px-6 py-3 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative group">
+          <div className="flex md:inline-flex w-full md:w-auto flex-wrap items-center justify-between md:justify-start gap-4 px-6 py-4 md:py-3 border border-ldna-accent bg-ldna-accent/10 shadow-[0_0_20px_rgba(255,87,26,0.15)] relative group">
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-ldna-accent/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             <ShieldAlert className="w-5 h-5 text-ldna-accent shrink-0" />
             <TooltipLabel
@@ -261,7 +285,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
             />
             <span className="font-mono text-ldna-text border-l border-ldna-accent/30 pl-4 whitespace-nowrap">{data.classification.confidence}% CONF</span>
             {data.dataMode === "partial" && (
-              <span className="font-mono text-[10px] text-ldna-warning border border-ldna-warning/30 bg-ldna-warning/10 px-2 py-1 uppercase tracking-widest whitespace-nowrap absolute -bottom-8 right-0 lg:right-auto">
+              <span className="font-mono text-[10px] text-ldna-warning border border-ldna-warning/30 bg-ldna-warning/10 px-2 py-1 uppercase tracking-widest whitespace-nowrap absolute -bottom-8 right-0 md:hidden">
                 Partial Evidence
               </span>
             )}
