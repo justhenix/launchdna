@@ -5,6 +5,30 @@ import SpotlightGrid from "@/components/SpotlightGrid";
 import LiveMetricStrip from "@/components/LiveMetricStrip";
 
 export default function Home() {
+  const featuredCases = [
+    {
+      title: "Wrapped SOL",
+      symbol: "wSOL",
+      address: "So11111111111111111111111111111111111111112",
+      note: "Baseline liquidity reference for Solana-native flow.",
+      href: "/case/So11111111111111111111111111111111111111112?name=Wrapped%20SOL&symbol=wSOL",
+    },
+    {
+      title: "USD Coin",
+      symbol: "USDC",
+      address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      note: "Stable liquidity benchmark for risk-normalized reads.",
+      href: "/case/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?name=USD%20Coin&symbol=USDC",
+    },
+    {
+      title: "Case Files",
+      symbol: "SNAP",
+      address: "7v6mN7qkJXf3V9pH5d2Xr8cWyLk7QnF9sZtY3uP2aB1",
+      note: "Built-in forensic sample with full evidence coverage.",
+      href: "/case/mock-token?name=Case%20Files&symbol=SNAP",
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen relative">
       <SpotlightGrid />
@@ -154,8 +178,40 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-6 text-xs font-mono text-ldna-muted">
-              Captured from Birdeye data for forensic analysis and demo playback.
+              Local demo fallback for forensic report playback.
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Case Files */}
+      <section className="py-24 border-b border-ldna-grid bg-ldna-bg">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
+            <h2 className="text-3xl font-serif">Featured Case Files</h2>
+            <div className="text-xs font-mono text-ldna-muted uppercase tracking-widest">Curated replays</div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {featuredCases.map((item) => (
+              <Link
+                key={item.address}
+                href={item.href}
+                className="group bg-ldna-panel/60 border border-ldna-grid p-6 hover:border-ldna-accent/40 hover:bg-ldna-panel transition-all duration-300 flex flex-col gap-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-ldna-bg border border-ldna-grid flex items-center justify-center font-mono font-bold text-sm text-ldna-text/80 group-hover:text-ldna-accent group-hover:border-ldna-accent/40 transition-colors">
+                    {item.symbol}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-lg font-bold text-ldna-text group-hover:text-ldna-accent transition-colors truncate">{item.title}</div>
+                    <div className="text-[10px] font-mono text-ldna-muted uppercase tracking-widest truncate">{item.address}</div>
+                  </div>
+                </div>
+                <div className="text-sm text-ldna-muted leading-relaxed">{item.note}</div>
+                <div className="text-xs font-mono text-ldna-accent uppercase tracking-widest">Open case file</div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

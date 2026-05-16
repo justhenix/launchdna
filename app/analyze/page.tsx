@@ -151,7 +151,7 @@ export default function AnalyzePage() {
           </h2>
           <div className="flex items-center gap-2 text-xs font-mono text-ldna-text bg-ldna-panel px-3 py-1 border border-ldna-grid">
             <div className={`w-2 h-2 rounded-full ${isLoadingFeed ? "bg-ldna-muted" : feedMode === "mock" ? "bg-ldna-warning" : "bg-green-500 animate-[pulse_2s_ease-in-out_infinite]"}`} />
-            {isLoadingFeed ? "SYNCING..." : feedMode === "mock" ? "BIRDEYE SNAPSHOT" : "LIVE // SYNCED"}
+            {isLoadingFeed ? "SYNCING..." : feedMode === "mock" ? "LOCAL MOCK DATA" : "LIVE // SYNCED"}
           </div>
         </div>
 

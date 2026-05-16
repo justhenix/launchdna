@@ -15,5 +15,6 @@ export async function GET() {
     caseFilesGenerated: stats.caseFilesGenerated,
     generatedAt: stats.generatedAt,
     storageMode: stats.storageMode,
+    storageLabel: stats.storageMode === "supabase" ? "Supabase durable store" : "Local fallback store",
   });
 }

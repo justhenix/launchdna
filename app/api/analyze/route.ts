@@ -4,6 +4,8 @@ import { BirdeyeClient, type BirdeyeRequestResult } from "@/lib/birdeye/client";
 import { BIRDEYE_CASE_ENDPOINTS } from "@/lib/birdeye/endpoints";
 import { classifyLaunch, createMockLaunchCase } from "@/lib/classifier/classifyLaunch";
 import { buildEndpointProof, fallbackEndpointProof } from "@/lib/proof/endpointProof";
+import { persistCaseFile, supabaseErrorForClient } from "@/lib/proof/supabaseProofStore";
+import type { LaunchCase } from "@/types/launch-case";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -105,6 +107,23 @@ function isLikelySolanaAddress(address: string) {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 }
 
+async function jsonCase(launchCase: LaunchCase) {
+  try {
+    await persistCaseFile(launchCase);
+  } catch (error) {
+    console.error("Supabase case_files insert failed:", error);
+    if (process.env.NODE_ENV !== "production") {
+      return NextResponse.json(launchCase, {
+        headers: {
+          "x-launchdna-supabase-error": JSON.stringify(supabaseErrorForClient(error)),
+        },
+      });
+    }
+  }
+
+  return NextResponse.json(launchCase);
+}
+
 export async function POST(request: Request) {
   let address = MOCK_ADDRESS;
   let name: string | undefined;
@@ -122,7 +141,7 @@ export async function POST(request: Request) {
     if (!client.hasApiKey() || address === "mock-token" || !isLikelySolanaAddress(address)) {
       const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
       const snapshotAddress = address === "mock-token" ? "" : address;
-      return NextResponse.json(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
+      return jsonCase(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
     }
 
     const results: BirdeyeRequestResult[] = [];
@@ -157,7 +176,7 @@ export async function POST(request: Request) {
     const hasCoreLiveEvidence = overview?.ok && (ohlcv?.ok || txs?.ok);
 
     if (timedOut()) {
-      return NextResponse.json(classifyLaunch({
+      return jsonCase(classifyLaunch({
         address,
         name,
         symbol,
@@ -173,7 +192,7 @@ export async function POST(request: Request) {
     }
 
     if (liveCount === 0) {
-      return NextResponse.json(classifyLaunch({
+      return jsonCase(classifyLaunch({
         address,
         name,
         symbol,
@@ -188,7 +207,7 @@ export async function POST(request: Request) {
       }));
     }
 
-    return NextResponse.json(classifyLaunch({
+    return jsonCase(classifyLaunch({
       address,
       name,
       symbol,
@@ -205,11 +224,11 @@ export async function POST(request: Request) {
     if (address === "mock-token" || !isLikelySolanaAddress(address)) {
       const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
       const snapshotAddress = address === "mock-token" ? "" : address;
-      return NextResponse.json(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
+      return jsonCase(createMockLaunchCase(snapshotAddress, endpointProof, "mock", { name, symbol }));
     }
 
     const endpointProof = fallbackEndpointProof(BIRDEYE_CASE_ENDPOINTS);
-    return NextResponse.json(classifyLaunch({
+    return jsonCase(classifyLaunch({
       address,
       name,
       symbol,

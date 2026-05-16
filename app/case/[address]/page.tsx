@@ -222,9 +222,10 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
   const buyShare = tradeTotal > 0 ? Math.min(100, Math.max(0, (data.trades.buys / tradeTotal) * 100)) : 50;
   const topHolders = data.holders.filter((holder) => holder.percentage > 0.01);
   const labeledWallets = data.labeledWallets ?? [];
+  const missingEvidence = (data.evidenceQuality?.missing ?? []).map((item) => item.trim()).filter(Boolean);
 
   return (
-    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-7xl relative">
+    <div className="flex-1 flex flex-col container mx-auto px-4 py-12 max-w-7xl relative overflow-x-hidden">
       <div className="fixed inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay -z-10" />
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-ldna-accent/5 via-ldna-bg to-ldna-bg -z-20 mix-blend-screen" />
 
@@ -236,6 +237,11 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
           <div className="mt-3 text-sm font-mono text-ldna-warning/80 leading-relaxed">
             Limited Evidence. Some Birdeye datasets were unavailable for this token or analysis window. LaunchDNA used available evidence.
           </div>
+          {missingEvidence.length > 0 && (
+            <div className="mt-3 text-xs font-mono text-ldna-warning/80 uppercase tracking-widest">
+              Missing: {missingEvidence.join(", ")}
+            </div>
+          )}
         </div>
       )}
 
@@ -300,7 +306,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
       {data.dataMode === "mock" && (
         <div className="mb-12 -mt-6 text-xs font-mono text-ldna-muted flex items-center gap-2">
           <Database className="w-3.5 h-3.5" />
-          <span>Captured from Birdeye data for forensic analysis and demo playback.</span>
+          <span>Local demo fallback. No live Birdeye or Supabase data used for this case.</span>
         </div>
       )}
 

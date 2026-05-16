@@ -18,7 +18,7 @@ export type DurableApiCallStats = {
   tokensAnalyzed: number;
   caseFilesGenerated: number;
   generatedAt: string;
-  storageMode: "supabase" | "memory";
+  storageMode: "supabase" | "local";
 };
 
 type ApiLogGlobal = typeof globalThis & {
@@ -44,7 +44,9 @@ export function logBirdeyeCall(entry: Omit<BirdeyeCallLogEntry, "at">) {
   getStore().push(fullEntry);
   void import("@/lib/proof/supabaseProofStore")
     .then(({ persistBirdeyeCall }) => persistBirdeyeCall(fullEntry))
-    .catch(() => undefined);
+    .catch((error) => {
+      console.error("Supabase launchdna_api_calls insert failed:", error);
+    });
 }
 
 export function getApiCallStats() {
@@ -95,7 +97,7 @@ function buildMemoryStats(): DurableApiCallStats {
     tokensAnalyzed: tokenSet.size,
     caseFilesGenerated: caseSet.size,
     generatedAt: new Date().toISOString(),
-    storageMode: "memory",
+    storageMode: "local",
   };
 }
 

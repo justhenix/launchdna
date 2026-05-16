@@ -8,7 +8,8 @@ type ProofData = {
   tokensAnalyzed: number;
   caseFilesGenerated: number;
   generatedAt: string;
-  storageMode: "supabase" | "memory";
+  storageMode: "supabase" | "local";
+  storageLabel?: string;
 };
 
 export default function LiveMetricStrip() {
@@ -67,6 +68,11 @@ export default function LiveMetricStrip() {
             </div>
           ))}
         </div>
+        {data?.storageMode === "local" && (
+          <div className="bg-ldna-panel/90 px-4 py-2 text-center text-[10px] font-mono uppercase tracking-widest text-ldna-warning border-t border-ldna-grid">
+            Local fallback stats - Supabase unavailable
+          </div>
+        )}
       </div>
     </section>
   );

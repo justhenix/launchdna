@@ -1,6 +1,8 @@
 import "server-only";
 
+import { getSupabaseServerConfig, supabaseRestRequest, type SupabaseRestError } from "@/lib/supabase/server";
 import type { BirdeyeCallLogEntry } from "@/lib/proof/apiCallLogger";
+import type { LaunchCase } from "@/types/launch-case";
 
 type SupabaseProofStats = {
   totalBirdeyeCalls: number;
@@ -18,34 +20,22 @@ type SupabaseProofRow = {
   calls?: number | null;
 };
 
-function readSupabaseConfig() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+type SupabaseCaseFileRow = {
+  case_id?: string | null;
+  token_address?: string | null;
+};
 
-  if (!url || !serviceRoleKey) {
-    return null;
-  }
-
-  return {
-    restUrl: `${url.replace(/\/$/, "")}/rest/v1/launchdna_api_calls`,
-    serviceRoleKey,
-  };
-}
+const API_CALL_TABLE = "launchdna_api_calls";
 
 function normalizeText(value?: string | null) {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined;
 }
 
 export function hasSupabaseProofStore(): boolean {
-  return readSupabaseConfig() !== null;
+  return getSupabaseServerConfig() !== null;
 }
 
 export async function persistBirdeyeCall(entry: BirdeyeCallLogEntry): Promise<void> {
-  const config = readSupabaseConfig();
-  if (!config) {
-    return;
-  }
-
   const payload = {
     endpoint: entry.endpoint,
     token_address: normalizeText(entry.tokenAddress) ?? null,
@@ -54,52 +44,63 @@ export async function persistBirdeyeCall(entry: BirdeyeCallLogEntry): Promise<vo
     status: entry.status,
     status_code: entry.statusCode ?? null,
     duration_ms: entry.durationMs ?? null,
+    error_message: normalizeText(entry.error) ?? null,
   };
 
-  const response = await fetch(config.restUrl, {
+  const result = await supabaseRestRequest<undefined>(API_CALL_TABLE, {
     method: "POST",
-    headers: {
-      apikey: config.serviceRoleKey,
-      Authorization: `Bearer ${config.serviceRoleKey}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify(payload),
-    cache: "no-store",
+    body: payload,
+    prefer: "return=minimal",
   });
 
-  if (!response.ok) {
-    throw new Error(`Supabase proof insert failed: ${response.status}`);
+  if (result.error) {
+    throw result.error;
+  }
+}
+
+export async function persistCaseFile(launchCase: LaunchCase): Promise<void> {
+  const caseId = normalizeText(launchCase.token.address) ?? `case-${Date.now()}`;
+  const payload = {
+    case_id: caseId,
+    token_address: normalizeText(launchCase.token.address) ?? null,
+    token_name: normalizeText(launchCase.token.name) ?? null,
+    token_symbol: normalizeText(launchCase.token.symbol) ?? null,
+    archetype: launchCase.classification.archetype,
+    confidence: launchCase.classification.confidence,
+    data_mode: launchCase.dataMode,
+    evidence_quality_status: launchCase.evidenceQuality.status,
+    case_json: launchCase,
+    updated_at: new Date().toISOString(),
+  };
+  const query = new URLSearchParams({ on_conflict: "case_id" });
+  const result = await supabaseRestRequest<undefined>("case_files", {
+    method: "POST",
+    query,
+    body: payload,
+    prefer: "resolution=merge-duplicates,return=minimal",
+  });
+
+  if (result.error) {
+    throw result.error;
   }
 }
 
 export async function getSupabaseProofStats(): Promise<SupabaseProofStats | null> {
-  const config = readSupabaseConfig();
-  if (!config) {
-    return null;
-  }
-
   const params = new URLSearchParams({
     select: "endpoint,token_address,case_id,calls",
     limit: "10000",
     order: "created_at.desc",
   });
-
-  const response = await fetch(`${config.restUrl}?${params.toString()}`, {
-    headers: {
-      apikey: config.serviceRoleKey,
-      Authorization: `Bearer ${config.serviceRoleKey}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
+  const result = await supabaseRestRequest<SupabaseProofRow[]>(API_CALL_TABLE, {
+    query: params,
   });
 
-  if (!response.ok) {
+  if (result.error) {
+    console.error(`Supabase ${API_CALL_TABLE} select failed:`, result.error);
     return null;
   }
 
-  const rows = (await response.json().catch(() => null)) as SupabaseProofRow[] | null;
-  if (!Array.isArray(rows)) {
+  if (!Array.isArray(result.data)) {
     return null;
   }
 
@@ -108,7 +109,7 @@ export async function getSupabaseProofStats(): Promise<SupabaseProofStats | null
   const caseSet = new Set<string>();
   let totalBirdeyeCalls = 0;
 
-  for (const row of rows) {
+  for (const row of result.data) {
     const endpoint = normalizeText(row.endpoint);
     const tokenAddress = normalizeText(row.token_address);
     const caseId = normalizeText(row.case_id);
@@ -136,8 +137,56 @@ export async function getSupabaseProofStats(): Promise<SupabaseProofStats | null
     totalBirdeyeCalls,
     uniqueEndpoints: endpointSet.size,
     tokensAnalyzed: tokenSet.size,
-    caseFilesGenerated: caseSet.size,
+    caseFilesGenerated: await getCaseFilesGenerated(caseSet),
     generatedAt: new Date().toISOString(),
     storageMode: "supabase",
   };
+}
+
+async function getCaseFilesGenerated(fallbackCaseSet: Set<string>) {
+  const params = new URLSearchParams({
+    select: "case_id,token_address",
+    limit: "10000",
+    order: "created_at.desc",
+  });
+  const result = await supabaseRestRequest<SupabaseCaseFileRow[]>("case_files", {
+    query: params,
+  });
+
+  if (result.error) {
+    console.error("Supabase case_files select failed:", result.error);
+    return fallbackCaseSet.size;
+  }
+
+  if (!Array.isArray(result.data)) {
+    return fallbackCaseSet.size;
+  }
+
+  const caseSet = new Set<string>();
+  for (const row of result.data) {
+    const caseId = normalizeText(row.case_id);
+    const tokenAddress = normalizeText(row.token_address);
+    if (caseId ?? tokenAddress) {
+      caseSet.add(caseId ?? tokenAddress!);
+    }
+  }
+
+  return caseSet.size;
+}
+
+export function supabaseErrorForClient(error: unknown) {
+  if (process.env.NODE_ENV === "production") {
+    return "Supabase persistence failed";
+  }
+
+  const restError = error as Partial<SupabaseRestError>;
+  if (typeof restError.message === "string") {
+    return {
+      status: restError.status,
+      message: restError.message,
+      details: restError.details,
+    };
+  }
+
+  return error instanceof Error ? error.message : error;
 }

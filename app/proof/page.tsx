@@ -1,11 +1,58 @@
 import { Database, Server, Cpu, FileText, CheckCircle2, Activity } from "lucide-react";
-
-import { getDurableApiCallStats } from "@/lib/proof/apiCallLogger";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
+type ProofStats = {
+  totalBirdeyeCalls: number;
+  uniqueEndpoints: number;
+  tokensAnalyzed: number;
+  caseFilesGenerated: number;
+  generatedAt: string;
+  storageMode: "supabase" | "local";
+  storageLabel?: string;
+};
+
+const LOCAL_PROOF_FALLBACK: ProofStats = {
+  totalBirdeyeCalls: 0,
+  uniqueEndpoints: 0,
+  tokensAnalyzed: 0,
+  caseFilesGenerated: 0,
+  generatedAt: new Date().toISOString(),
+  storageMode: "local",
+  storageLabel: "Local fallback store",
+};
+
+async function getProofStatsFromApi(): Promise<ProofStats> {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  if (!host) {
+    return LOCAL_PROOF_FALLBACK;
+  }
+
+  const proto = headerStore.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
+  const response = await fetch(`${proto}://${host}/api/proof`, { cache: "no-store" }).catch(() => null);
+  if (!response?.ok) {
+    return LOCAL_PROOF_FALLBACK;
+  }
+
+  return response.json() as Promise<ProofStats>;
+}
+
 export default async function ProofPage() {
-  const proof = await getDurableApiCallStats();
+  const proof = await getProofStatsFromApi();
+
+  const storageBadge = proof.storageMode === "supabase"
+    ? {
+        label: "Supabase Durable Store",
+        className: "text-ldna-accent border-ldna-accent/30 bg-ldna-accent/10",
+        dot: "bg-ldna-accent",
+      }
+    : {
+        label: "Local Fallback Store",
+        className: "text-ldna-warning border-ldna-warning/30 bg-ldna-warning/10",
+        dot: "bg-ldna-warning",
+      };
 
   const stats = [
     { label: "BIRDEYE CALLS", value: proof.totalBirdeyeCalls.toLocaleString(), color: "text-ldna-text" },
@@ -29,6 +76,10 @@ export default async function ProofPage() {
 
       <div className="mb-16 text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-serif mb-6 tracking-tight">Technical Architecture</h1>
+        <div className={`inline-flex items-center gap-2 border px-3 py-1 text-xs font-mono uppercase tracking-widest mb-5 ${storageBadge.className}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${storageBadge.dot}`} />
+          {storageBadge.label}
+        </div>
         <p className="text-ldna-muted text-lg leading-relaxed">
           LaunchDNA is a forensic launch classifier for Solana tokens.
           This page outlines our system architecture and data utilization strategy.
@@ -56,8 +107,11 @@ export default async function ProofPage() {
             Live Birdeye Progress
           </h3>
           <p className="text-ldna-text/80 leading-relaxed text-sm md:text-base mb-3">
-            LaunchDNA logs real Birdeye requests used during token analysis. The current progress counters are stored durably and feed the case-file workflow.
+            LaunchDNA logs real Birdeye requests used during token analysis. The current progress counters are read through the proof API route.
           </p>
+          <div className="text-xs font-mono uppercase tracking-widest text-ldna-muted">
+            Storage: {proof.storageMode === "supabase" ? "Supabase durable store" : "Local fallback - Supabase unavailable"}
+          </div>
         </div>
       </div>
 
