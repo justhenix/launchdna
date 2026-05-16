@@ -335,7 +335,7 @@ export default function CaseFilePage({ params }: { params: Promise<{ address: st
                 <TooltipLabel label="OHLCV" className="uppercase tracking-widest" align="start" />
               </span>
             </h2>
-            <div className="bg-ldna-panel/60 border border-ldna-grid p-4 md:p-8 h-65 md:h-100 relative group overflow-hidden">
+            <div className="bg-ldna-panel/60 border border-ldna-grid p-4 md:p-8 h-[260px] md:h-[400px] relative group overflow-hidden">
               {/* Scanline effect */}
               <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-size-[100%_4px] opacity-20 group-hover:opacity-10 transition-opacity" />
               <ResponsiveContainer width="100%" height="100%">

@@ -1,4 +1,4 @@
-import { Database, Server, Cpu, FileText, CheckCircle2, Activity } from "lucide-react";
+import { Database, Server, Cpu, FileText, CheckCircle2 } from "lucide-react";
 
 export const dynamic = "force-static";
 

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, ShieldAlert, Activity, Database, Cpu, Search, CheckCircle2, ChevronDown } from "lucide-react";
 import { TooltipLabel } from "@/components/InfoTooltip";
 import SpotlightGrid from "@/components/SpotlightGrid";
-import LiveMetricStrip from "@/components/LiveMetricStrip";
 
 type FeaturedCase = {
   title: string;

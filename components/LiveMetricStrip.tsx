@@ -1,4 +1,4 @@
-// Static integration strip. Raw proof counters live on /proof.
+// Static integration strip. Global proof counters were removed from production UI.
 
 export default function LiveMetricStrip() {
   const STATIC_SAFE_METRICS = [
